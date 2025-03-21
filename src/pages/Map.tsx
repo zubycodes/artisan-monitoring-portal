@@ -121,13 +121,11 @@ const Map = () => {
     const type = e.target.id;
     if (type == 'division') {
       console.log('division', e.target.value);
-
     } else if (type == 'district') {
       console.log('district', e.target.value);
 
     } else if (type == 'tehsil') {
       console.log('tehsil', e.target.value);
-
     }
   };
   return (
