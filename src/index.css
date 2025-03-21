@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -89,15 +88,22 @@
 
 @layer base {
   * {
-    @apply border-border transition-colors duration-200;
+    @apply border-border ;
   }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif tracking-tight;
   }
 }
@@ -106,32 +112,32 @@
   .glass-card {
     @apply bg-white/80 backdrop-blur-md rounded-lg border border-white/20 shadow-lg;
   }
-  
+
   .glass-panel {
     @apply bg-white/40 backdrop-blur-md rounded-lg border border-white/10;
   }
-  
+
   .subtle-shadow {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.05);
   }
-  
+
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
   }
-  
+
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .shimmer {
     @apply relative overflow-hidden;
   }
-  
+
   .shimmer::after {
     @apply absolute inset-0;
     content: '';
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     animation: shimmer 2s infinite;
   }
 }
@@ -140,12 +146,63 @@
   .clip-circle {
     clip-path: circle(50% at 50% 50%);
   }
-  
+
   .mask-fade-right {
     mask-image: linear-gradient(to right, black 80%, transparent 100%);
   }
-  
+
   .mask-fade-bottom {
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
   }
+}
+
+/* Light Mode */
+.stat-card-1 {
+  background-color: #00BFFF;
+  /* Deep Sky Blue */
+  color: black;
+}
+
+.stat-card-2 {
+  background-color: #32CD32;
+  /* Lime Green */
+  color: black;
+}
+
+.stat-card-3 {
+  background-color: #FFA500;
+  /* Orange */
+  color: black;
+}
+
+.stat-card-4 {
+  background-color: #DA70D6;
+  /* Orchid */
+  color: black;
+}
+
+/* Dark Mode */
+.dark .stat-card-1 {
+  background-color: #1E90FF;
+  /* Dodger Blue */
+  color: hsl(var(--primary-foreground));
+  /* Keeping original foreground variable */
+}
+
+.dark .stat-card-2 {
+  background-color: #228B22;
+  /* Forest Green */
+  color: white;
+}
+
+.dark .stat-card-3 {
+  background-color: #FF6347;
+  /* Tomato */
+  color: white;
+}
+
+.dark .stat-card-4 {
+  background-color: #8A2BE2;
+  /* Blue Violet */
+  color: white;
 }

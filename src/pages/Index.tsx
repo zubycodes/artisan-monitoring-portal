@@ -65,52 +65,55 @@ const Dashboard = () => {
   
   return (
     <Layout>
-      <PageHeader
-        title="Dashboard"
-        description="Welcome to the Punjab Artisan Monitoring Portal. Monitor and manage artisan data across the region."
-      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard 
-          title="Total Artisans" 
-          value="1,247" 
-          description="Active artisans in the database" 
-          icon={<Users className="h-5 w-5" />} 
-          trend={{ value: 12, isPositive: true }} 
+        <StatCard
+          className="stat-card-1"
+          title="Total Artisans"
+          value="1,247"
+          description="Active artisans in the database"
+          icon={<Users className="h-5 w-5" />}
+          trend={{ value: 12, isPositive: true }}
         />
-        <StatCard 
-          title="Craft Categories" 
-          value="24" 
-          description="Different types of crafts" 
-          icon={<Palette className="h-5 w-5" />} 
+        <StatCard
+          className="stat-card-2"
+          title="Craft Categories"
+          value="24"
+          description="Different types of crafts"
+          icon={<Palette className="h-5 w-5" />}
         />
-        <StatCard 
-          title="Regions Covered" 
-          value="18" 
-          description="Districts across Punjab" 
-          icon={<Map className="h-5 w-5" />} 
+        <StatCard
+          className="stat-card-3"
+          title="Regions Covered"
+          value="18"
+          description="Districts across Punjab"
+          icon={<Map className="h-5 w-5" />}
         />
-        <StatCard 
-          title="Monthly Growth" 
-          value="8.3%" 
-          description="Increase in new registrations" 
-          icon={<TrendingUp className="h-5 w-5" />} 
-          trend={{ value: 3.2, isPositive: true }} 
+        <StatCard
+          className="stat-card-4"
+          title="Monthly Growth"
+          value="8.3%"
+          description="Increase in new registrations"
+          icon={<TrendingUp className="h-5 w-5" />}
+          trend={{ value: 3.2, isPositive: true }}
         />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <PieChartCard 
           title="Gender Distribution" 
-          data={genderData} 
+          data={genderData}
+          className="cursor-pointer"
         />
         <PieChartCard 
           title="Regional Distribution" 
           data={regionData} 
+          className="cursor-pointer"
         />
         <BarChartCard 
           title="Top Skills Distribution" 
           data={skillData} 
+          className="cursor-pointer"
         />
       </div>
       

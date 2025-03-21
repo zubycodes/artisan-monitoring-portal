@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -9,8 +9,9 @@ import {
   BarChart4,
   Settings,
   ChevronDown,
-  Bell,
-  LogOut
+  LogOut,
+  Moon,
+  Sun
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -24,13 +25,23 @@ import {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [theme, setTheme] = useState(localStorage.getItem("theme") === "dark" ? "dark" : "light");
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
   
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
   
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/75 border-b border-slate-200 px-8 py-4">
+    <nav className="top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/11 border-b border-slate-200 px-8 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div className="flex items-center gap-2">
@@ -40,33 +51,33 @@ const Navbar = () => {
             <span className="font-serif text-xl font-semibold">Artisan Portal</span>
           </div>
           <div className="hidden md:flex items-center space-x-1">
-            <Button 
-              variant={isActive('/') ? "secondary" : "ghost"} 
-              className="gap-2" 
+            <Button
+              variant={isActive('/') ? "secondary" : "ghost"}
+              className="gap-2"
               onClick={() => navigate('/')}
             >
               <LayoutDashboard className="h-4 w-4" />
               <span>Dashboard</span>
             </Button>
-            <Button 
-              variant={isActive('/artisans') ? "secondary" : "ghost"} 
-              className="gap-2" 
-              onClick={() => navigate('/artisans')}
+            <Button
+              variant={isActive('/manage') ? "secondary" : "ghost"}
+              className="gap-2"
+              onClick={() => navigate('/manage')}
             >
               <Users className="h-4 w-4" />
-              <span>Artisans</span>
+              <span>Manage</span>
             </Button>
-            <Button 
-              variant={isActive('/map') ? "secondary" : "ghost"} 
-              className="gap-2" 
+            <Button
+              variant={isActive('/map') ? "secondary" : "ghost"}
+              className="gap-2"
               onClick={() => navigate('/map')}
             >
               <Map className="h-4 w-4" />
               <span>Map</span>
             </Button>
-            <Button 
-              variant={isActive('/reports') ? "secondary" : "ghost"} 
-              className="gap-2" 
+            <Button
+              variant={isActive('/reports') ? "secondary" : "ghost"}
+              className="gap-2"
               onClick={() => navigate('/reports')}
             >
               <BarChart4 className="h-4 w-4" />
@@ -75,11 +86,13 @@ const Navbar = () => {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1.5 h-2 w-2 rounded-full bg-primary"></span>
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {theme === "light" ? (
+              <Moon className="h-5 w-5" />
+            ) : (
+              <Sun className="h-5 w-5" />
+            )}
           </Button>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2">
