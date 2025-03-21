@@ -90,7 +90,7 @@ const Layout = ({ children, className }: LayoutProps) => {
         </>
       )}
       
-      <main className={cn("flex-1 pt-24 pb-8 px-4 md:px-8", className)}>
+      <main className={cn("flex-1 pt-10 pb-8 px-4 md:px-8", className)}>
         <div className="container mx-auto">
           {children}
         </div>
