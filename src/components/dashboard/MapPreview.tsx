@@ -1,26 +1,267 @@
-
-import React from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import GoogleMapReact from 'google-map-react';
+import { districtsLatLong } from '@/pages/map-config';
 
 interface MapPreviewProps {
   className?: string;
+  artisans?: any;
+  loading: boolean;
 }
-const Marker = ({ lat, lng, text }) => <div>{text}</div>;
 
-const MapPreview = ({ className }: MapPreviewProps) => {
+// Constants
+const API_BASE_URL = 'http://13.239.184.38:6500';
+const GEOJSON_URL = 'https://beige-cathe-75.tiiny.site/pakistan_districts.json';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCDMOfZ6Xc-MV7pSImhOrf2q8MaYr28shM';
+const INITIAL_MAP_CENTER = { lat: 31.1704, lng: 72.7097 };
+const INITIAL_MAP_ZOOM = 6;
+const DISTRICT_ZOOM = 8;
+
+// Marker component for individual artisans
+const Marker = ({ lat, lng, artisan, $hover = false, onClick }) => {
+  return (
+    <div className="relative">
+      <img
+        src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+        width="20"
+        height="10"
+        className={`cursor-pointer transition-transform ${$hover ? 'scale-110' : ''}`}
+        alt="Marker"
+      />
+    </div>
+  );
+};
+
+// Animated Cluster Marker component
+const ClusterMarker = ({ lat, lng, count, $hover = false, onClick }) => {
+  // Motion animation config
+  const initialScale = 0.6;
+  const defaultScale = 1;
+  const hoveredScale = 1.15;
+  const stiffness = 320;
+  const damping = 7;
+  const precision = 0.001;
+
+  // Calculate size based on count (min 32px, max 60px)
+  const size = Math.min(Math.max(32, count * 3), 60);
+
+  return (
+    <React.Fragment>
+      <div
+        className="flex items-center justify-center rounded-full bg-primary text-white font-bold shadow-md"
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          transform: `translate3D(0,0,0) scale(1.1, 1)`,
+          cursor: 'pointer',
+          zIndex: count,
+        }}
+      >
+        {count}
+      </div>
+    </React.Fragment>
+  );
+};
+
+const MapPreview = ({ artisans = [], className, loading }: MapPreviewProps) => {
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const defaultProps = {
-    center: {
-      lat: 10.99835602,
-      lng: 77.01502627
-    },
-    zoom: 11
+  const [mapProps, setMapProps] = useState({
+    center: INITIAL_MAP_CENTER,
+    zoom: INITIAL_MAP_ZOOM
+  });
+  const [clusters, setClusters] = useState([]);
+  const [map, setMap] = useState(null);
+  const [maps, setMaps] = useState(null);
+
+  // Function to create clusters based on current zoom level and map bounds
+  const createClusters = useCallback(() => {
+    if (!map || !maps || !artisans.length) return;
+
+    const bounds = map.getBounds();
+    const zoom = map.getZoom();
+
+    // Skip clustering at high zoom levels
+    if (zoom >= 14) {
+      setClusters(artisans.map(artisan => ({
+        lat: artisan.latitude,
+        lng: artisan.longitude,
+        count: 1,
+        id: artisan.id,
+        isCluster: false,
+        artisan
+      })));
+      return;
+    }
+
+    // Clear existing clusters
+    const newClusters = [];
+    const clusterMap = {};
+
+    // Grid size decreases as zoom increases (more precise clustering at higher zoom)
+    const gridSize = Math.pow(2, 16 - zoom) * 0.005;
+
+    // Create grid-based clusters
+    artisans.forEach(artisan => {
+      const lat = artisan.latitude;
+      const lng = artisan.longitude;
+
+      // Skip if outside current view
+      if (bounds && !bounds.contains(new maps.LatLng(lat, lng))) return;
+
+      // Calculate grid cell
+      const cellX = Math.floor(lng / gridSize);
+      const cellY = Math.floor(lat / gridSize);
+      const cellId = `${cellX}-${cellY}`;
+
+      if (!clusterMap[cellId]) {
+        clusterMap[cellId] = {
+          lat: 0,
+          lng: 0,
+          count: 0,
+          items: [],
+          id: cellId,
+          isCluster: true
+        };
+        newClusters.push(clusterMap[cellId]);
+      }
+
+      // Add to cluster and update centroid
+      clusterMap[cellId].count += 1;
+      clusterMap[cellId].items.push(artisan);
+      clusterMap[cellId].lat += lat;
+      clusterMap[cellId].lng += lng;
+    });
+
+    // Calculate final cluster positions (centroids)
+    newClusters.forEach(cluster => {
+      if (cluster.count > 0) {
+        cluster.lat /= cluster.count;
+        cluster.lng /= cluster.count;
+      }
+
+      // Convert single-item clusters to regular markers
+      if (cluster.count === 1) {
+        cluster.isCluster = false;
+        cluster.artisan = cluster.items[0];
+      }
+    });
+
+    setClusters(newClusters);
+  }, [map, maps, artisans]);
+
+  // Re-cluster when map bounds change
+  useEffect(() => {
+    if (map && maps) {
+      createClusters();
+
+      // Add listeners for map events that should trigger re-clustering
+      const boundsChangeListener = map.addListener('bounds_changed', createClusters);
+      const zoomChangeListener = map.addListener('zoom_changed', createClusters);
+
+      return () => {
+        // Clean up listeners
+        maps.event.removeListener(boundsChangeListener);
+        maps.event.removeListener(zoomChangeListener);
+      };
+    }
+  }, [map, maps, createClusters]);
+
+  // Animate to selected district
+  const animateToDistrict = useCallback((district) => {
+    // Reset to default view first
+    setMapProps({
+      center: INITIAL_MAP_CENTER,
+      zoom: INITIAL_MAP_ZOOM
+    });
+
+    if (!district) return;
+
+    // Then animate to district
+    setTimeout(() => {
+      const districtLatLong = districtsLatLong.find(x => x.name === district);
+      if (districtLatLong) {
+        setMapProps({
+          center: {
+            lat: districtLatLong.latitude,
+            lng: districtLatLong.longitude
+          },
+          zoom: DISTRICT_ZOOM
+        });
+      }
+    }, 500);
+  }, []);
+
+  // Handle Google Maps API loading
+  const handleApiLoaded = useCallback(({ map, maps }) => {
+    console.log('Google Maps API loaded');
+    setMap(map);
+    setMaps(maps);
+
+    // Fetch and load GeoJSON
+    fetch(GEOJSON_URL)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load GeoJSON');
+        }
+        return response.json();
+      })
+      .then(geoJsonData => {
+        map.data.addGeoJson(geoJsonData);
+
+        // Style the GeoJSON features
+        map.data.setStyle({
+          fillColor: 'green',
+          strokeColor: 'black',
+          fillOpacity: 0.2,
+          strokeWeight: 0.5,
+        });
+
+        // Add click listener for interactivity
+        map.data.addListener('click', (event) => {
+          const feature = event.feature;
+          const district = feature.getProperty('districts');
+          console.log('District clicked:', district);
+
+          animateToDistrict(district);
+        });
+
+        // Initial cluster creation
+        createClusters();
+      })
+      .catch(error => {
+        console.error('Error loading GeoJSON:', error);
+        setError('Failed to load map data.');
+      });
+  }, [animateToDistrict, createClusters]);
+
+  // Handle cluster click - zoom in or display info
+  const handleClusterClick = (cluster) => {
+    if (cluster.isCluster && cluster.count > 1) {
+      // Zoom in on cluster
+      setMapProps({
+        center: { lat: cluster.lat, lng: cluster.lng },
+        zoom: Math.min(mapProps.zoom + 2, 14)
+      });
+    } else if (!cluster.isCluster && cluster.artisan) {
+      // Show artisan info (you could implement a modal or info window here)
+      console.log('Artisan clicked:', cluster.artisan);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="mt-2 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <Card className={cn("hover-lift overflow-hidden", className)}>
       <CardHeader className="pb-2">
@@ -39,33 +280,45 @@ const MapPreview = ({ className }: MapPreviewProps) => {
       </CardHeader>
       <CardContent>
         <div className="relative aspect-video w-full bg-slate-100 rounded-md overflow-hidden">
-          {/* <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v11/static/74.3587,31.5204,7/600x400?access_token=pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbHN1NzgwazQwYnU2Mmtxanc5a296aXF3In0.8IqYJ6ogjCxnHw4H9hkbqQ')] bg-cover bg-center">
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-primary/80 rounded-full ring-4 ring-primary/30 animate-pulse"></div>
-            
-           
-            <div className="absolute top-[45%] left-[45%] w-3 h-3 bg-primary rounded-full"></div>
-            <div className="absolute top-[40%] left-[55%] w-3 h-3 bg-primary rounded-full"></div>
-            <div className="absolute top-[60%] left-[48%] w-3 h-3 bg-primary rounded-full"></div>
-            <div className="absolute top-[50%] left-[60%] w-3 h-3 bg-primary rounded-full"></div>
-            <div className="absolute top-[55%] left-[40%] w-3 h-3 bg-primary rounded-full"></div>
-            
-            <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent"></div>
-          </div> */}
           <GoogleMapReact
-            bootstrapURLKeys={{ key: "AIzaSyCDMOfZ6Xc-MV7pSImhOrf2q8MaYr28shM" }}
-            defaultCenter={defaultProps.center}
-            defaultZoom={defaultProps.zoom}
+            bootstrapURLKeys={{ key: GOOGLE_MAPS_API_KEY }}
+            center={mapProps.center}
+            zoom={mapProps.zoom}
+            onGoogleApiLoaded={handleApiLoaded}
+            options={{
+              fullscreenControl: false,
+              zoomControl: true,
+              clickableIcons: false
+            }}
+            hoverDistance={30}
+            onChange={({ zoom, center }) => {
+              setMapProps({ zoom, center });
+            }}
           >
-            <Marker
-              lat={59.955413}
-              lng={30.337844}
-              text="My Marker"
-            />
+            {clusters.map((cluster) => (
+              cluster.isCluster ? (
+                <ClusterMarker
+                  key={cluster.id}
+                  lat={cluster.lat}
+                  lng={cluster.lng}
+                  count={cluster.count}
+                  onClick={() => handleClusterClick(cluster)}
+                />
+              ) : (
+                <Marker
+                  key={cluster.id || cluster.artisan.id}
+                  lat={cluster.lat}
+                  lng={cluster.lng}
+                  artisan={cluster.artisan}
+                  onClick={() => handleClusterClick(cluster)}
+                />
+              )
+            ))}
           </GoogleMapReact>
           <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm p-3 flex justify-between items-center">
             <div>
               <p className="text-xs font-medium">Punjab Region</p>
-              <p className="text-xs text-muted-foreground">247 active artisans</p>
+              <p className="text-xs text-muted-foreground">{artisans.length} active artisans</p>
             </div>
             <div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
               5 new this week

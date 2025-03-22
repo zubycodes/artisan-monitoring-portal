@@ -54,14 +54,12 @@ const Manage = () => {
     { id: 2, username: 'Jane Smith', color: '#0f0' },
   ]);
   const tables = [
-    'education',
     'crafts',
     'categories',
     'techniques',
     'users',
-    'artisans',
   ]
-  const [activeTab, setActiveTab] = useState('crafts');
+  const [activeTab, setActiveTab] = useState('Craft');
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -124,10 +122,6 @@ const Manage = () => {
           >
             <Tabs defaultValue="artisans" className="w-100">
               <TabsList className="justify-between flex items-center">
-                <TabsTrigger value="Artisan" className="flex-1 items-center gap-1.5" onClick={() => setActiveTab('Artisan')}>
-                  <User className="h-4 w-4" />
-                  Artisans
-                </TabsTrigger>
                 <TabsTrigger value="Craft" className="flex-1 items-center gap-1.5" onClick={() => setActiveTab('Craft')}>
                   <Hammer className="h-4 w-4" />
                   Crafts
@@ -140,10 +134,10 @@ const Manage = () => {
                   <Wrench className="h-4 w-4" />
                   Technique/Skills
                 </TabsTrigger>
-                <TabsTrigger value="Education" className="flex-1 items-center gap-1.5" onClick={() => setActiveTab('Education')}>
+                {/*    <TabsTrigger value="Education" className="flex-1 items-center gap-1.5" onClick={() => setActiveTab('Education')}>
                   <Book className="h-4 w-4" />
                   Education
-                </TabsTrigger>
+                </TabsTrigger> */}
                 <TabsTrigger value="User" className="flex-1 items-center gap-1.5" onClick={() => setActiveTab('User')}>
                   <User className="h-4 w-4" />
                   Users
@@ -189,41 +183,6 @@ const Manage = () => {
                   </DialogContent>
                 </Dialog>
               </TabsList>
-              <TabsContent value="Artisan">
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-0">
-                      <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Name</TableHead>
-                              <TableHead className="w-12"></TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {artisans.map((artisan) => (
-                              <TableRow key={artisan.id} className="cursor-pointer">
-                                <TableCell>{artisan.name}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </motion.div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </TabsContent>
               <TabsContent value="Craft">
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
@@ -370,7 +329,7 @@ const Manage = () => {
                   </Card>
                 </motion.div>
               </TabsContent>
-              <TabsContent value="Education">
+              {/* <TabsContent value="Education">
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -414,7 +373,7 @@ const Manage = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-              </TabsContent>
+              </TabsContent> */}
               <TabsContent value="User">
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}

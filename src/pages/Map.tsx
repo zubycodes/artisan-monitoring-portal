@@ -431,7 +431,6 @@ const GoogleMap = ({ artisans, styles, selectedArtisan, mapProps, onMarkerClick,
           />
         )}
       </GoogleMapReact>
-      {selectedArtisan?.id}
     </div>
   </div>
 );
@@ -464,7 +463,7 @@ const Map = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tables = ['artisans', 'education', 'crafts', 'categories', 'techniques', 'users', 'geo_level'];
+        const tables = ['artisans', 'crafts', 'categories', 'techniques', 'users', 'geo_level'];
         const results = await Promise.all(
           tables.map(table =>
             fetch(`${API_BASE_URL}/${table}`)
@@ -476,7 +475,6 @@ const Map = () => {
         setMapData(prevData => ({
           ...prevData,
           artisans: results[0],
-          education: results[1],
           crafts: results[2],
           categories: results[3],
           techniqueSkills: results[4],

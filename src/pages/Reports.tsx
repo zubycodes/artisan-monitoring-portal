@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Layout from '@/components/layout/Layout';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,10 +30,10 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { DownloadCloud, FileText, Loader2 } from 'lucide-react';
+import { DownloadCloud, FileText, LayoutGrid, Loader2 } from 'lucide-react';
 
 // Base API URL - update this with your actual API base URL
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://13.239.184.38:6500';
 
 const Reports = () => {
   // State for various chart data
@@ -44,7 +43,15 @@ const Reports = () => {
   const [selectedTimePeriod, setSelectedTimePeriod] = useState('6months');
   const [selectedRegion, setSelectedRegion] = useState('all');
 
-  // States for different chart data
+  // States for different data tables
+  const [artisans, setArtisans] = useState([]);
+  const [crafts, setCrafts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [techniqueSkills, setTechniqueSkills] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  // States for derived chart data
   const [genderData, setGenderData] = useState([]);
   const [educationData, setEducationData] = useState([]);
   const [skillData, setSkillData] = useState([]);
@@ -64,73 +71,69 @@ const Reports = () => {
   // COLORS for pie charts and other visualizations
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
+  // Fetch raw data from all tables
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchRawData = async () => {
       setLoading(true);
-      setError(null);
-
       try {
-        // Fetch data based on the selected report type
-        if (selectedReportType === 'demographic') {
-          const [genderRes, educationRes, ageRes, tehsilRes, genderByTehsilRes] = await Promise.all([
-            axios.get(`${API_BASE_URL}/charts/gender`),
-            axios.get(`${API_BASE_URL}/charts/education`),
-            axios.get(`${API_BASE_URL}/charts/age`),
-            axios.get(`${API_BASE_URL}/charts/tehsil`),
-            axios.get(`${API_BASE_URL}/charts/gender-by-tehsil`)
-          ]);
-
-          setGenderData(genderRes.data);
-          setEducationData(educationRes.data);
-          setAgeData(ageRes.data);
-          setTehsilData(tehsilRes.data);
-          setGenderByTehsilData(genderByTehsilRes.data);
+        const response = await fetch(`${API_BASE_URL}/charts/all`);
+        const data = await response.json();
+        console.log(data);
+        if (data.genderDistribution) {
+          setGenderData(data.genderDistribution);
         }
-        else if (selectedReportType === 'economic') {
-          const [incomeRes, incomeBySkillRes, experienceVsIncomeRes, dependentsRes] = await Promise.all([
-            axios.get(`${API_BASE_URL}/charts/income`),
-            axios.get(`${API_BASE_URL}/charts/income-by-skill`),
-            axios.get(`${API_BASE_URL}/charts/experience-vs-income`),
-            axios.get(`${API_BASE_URL}/charts/dependents`)
-          ]);
-
-          setIncomeData(incomeRes.data);
-          setIncomeBySkillData(incomeBySkillRes.data);
-          setExperienceVsIncomeData(experienceVsIncomeRes.data);
-          setDependentsData(dependentsRes.data);
+        if (data.educationDistribution) {
+          setEducationData(data.educationDistribution);
         }
-        else if (selectedReportType === 'skills') {
-          const [skillRes, employmentRes, experienceRes, skillByEmploymentRes] = await Promise.all([
-            axios.get(`${API_BASE_URL}/charts/skill`),
-            axios.get(`${API_BASE_URL}/charts/employment-type`),
-            axios.get(`${API_BASE_URL}/charts/experience`),
-            axios.get(`${API_BASE_URL}/charts/skill-by-employment`)
-          ]);
-
-          setSkillData(skillRes.data);
-          setEmploymentTypeData(employmentRes.data);
-          setExperienceData(experienceRes.data);
-          setSkillByEmploymentData(skillByEmploymentRes.data);
+        if (data.ageDistribution) {
+          setAgeData(data.ageDistribution);
         }
-        else if (selectedReportType === 'growth') {
-          const [registrationsRes, cumulativeRes] = await Promise.all([
-            axios.get(`${API_BASE_URL}/charts/registrations-time`),
-            axios.get(`${API_BASE_URL}/charts/cumulative-registrations`)
-          ]);
-
-          setRegistrationsTimeData(registrationsRes.data);
-          setCumulativeRegistrationsData(cumulativeRes.data);
+        if (data.tehsilDistribution) {
+          setTehsilData(data.tehsilDistribution);
         }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load chart data. Please try again later.');
+        if (data.incomeDistribution) {
+          setIncomeData(data.incomeDistribution);
+        }
+        if (data.genderByTehsil) {
+          setGenderByTehsilData(data.genderByTehsil);
+        }
+        if (data.dependentsDistribution) {
+          setDependentsData(data.dependentsDistribution);
+        }
+        if (data.skillDistribution) {
+          setSkillData(data.skillDistribution);
+        }
+        if (data.averageIncomeBySkill) {
+          setIncomeBySkillData(data.averageIncomeBySkill);
+        }
+        if (data.experienceVsIncome) {
+          setExperienceVsIncomeData(data.experienceVsIncome);
+        }
+        if (data.skillByEmploymentType) {
+          setSkillByEmploymentData(data.skillByEmploymentType);
+        }
+        if (data.employmentTypeDistribution) {
+          setEmploymentTypeData(data.employmentTypeDistribution);
+        }
+        if (data.experienceDistribution) {
+          setExperienceData(data.experienceDistribution);
+        }
+        if (data.registrationsOverTime) {
+          setRegistrationsTimeData(data.registrationsOverTime);
+        }
+        if (data.cumulativeRegistrations) {
+          setCumulativeRegistrationsData(data.cumulativeRegistrations);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [selectedReportType, selectedTimePeriod, selectedRegion]);
+    fetchRawData();
+  }, []);
 
   // Function to export data
   const handleExport = () => {
@@ -144,24 +147,31 @@ const Reports = () => {
     alert('Save as template functionality will be implemented here');
   };
 
-  // Loading state
+  // Render loading state
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Loading chart data...</span>
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="mt-2 text-gray-600">Loading report data...</p>
         </div>
       </Layout>
     );
   }
 
-  // Error state
+  // Render error state
   if (error) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center justify-center h-64">
           <p className="text-red-500">{error}</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
         </div>
       </Layout>
     );
@@ -245,15 +255,10 @@ const Reports = () => {
 
       {/* Demographic Analysis */}
       {selectedReportType === 'demographic' && (
-        <Tabs defaultValue="gender" className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-            <TabsTrigger value="gender">Gender</TabsTrigger>
-            <TabsTrigger value="education">Education</TabsTrigger>
-            <TabsTrigger value="age">Age</TabsTrigger>
-            <TabsTrigger value="geographical">Geographical</TabsTrigger>
-          </TabsList>
+        <React.Fragment>
 
-          <TabsContent value="gender" className="space-y-6">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <Card>
               <CardHeader>
                 <CardTitle>Gender Distribution</CardTitle>
@@ -281,32 +286,6 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="education" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Education Level Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={educationData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" name="Count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="age" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Age Distribution</CardTitle>
@@ -315,26 +294,77 @@ const Reports = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={ageData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="range" />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis
+                      tickFormatter={(value) => value.toLocaleString()}
+                      label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+                    />
+                    <Tooltip formatter={(value) => [value.toLocaleString(), 'Count']} />
                     <Legend />
-                    <Bar dataKey="count" name="Number of People" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="value"
+                      name="Number of People"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                      barSize={40}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+          <div className="mb-4">
 
-          <TabsContent value="geographical" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Education Level Distribution</CardTitle>
+              </CardHeader>
+              <CardContent className="h-96">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={educationData}
+                    margin={{ top: 20, right: 30, left: 40, bottom: 80 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      tick={{ fontSize: 12 }}
+                      interval={0} // Ensure all labels are shown
+                    />
+                    <YAxis
+                      tickFormatter={(value) => value.toLocaleString()}
+                      label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+                    />
+                    <Tooltip formatter={(value) => [value.toLocaleString(), 'Count']} />
+                    <Legend wrapperStyle={{ paddingTop: 10 }} />
+                    <Bar
+                      dataKey="value"
+                      name="Education Level Distribution"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                      barSize={40}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="mb-4">
+
             <Card>
               <CardHeader>
                 <CardTitle>Geographical Distribution by Tehsil</CardTitle>
               </CardHeader>
-              <CardContent className="h-96">
+              <CardContent className="h-[150vh]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={tehsilData}
@@ -351,6 +381,8 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </div>
+          <div className="mb-4">
 
             <Card>
               <CardHeader>
@@ -367,27 +399,24 @@ const Reports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="male" name="Male" stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="female" name="Female" stackId="a" fill="#ec4899" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="other" name="Other" stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Male" name="Male" stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Female" name="Female" stackId="a" fill="#ec4899" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Other" name="Other" stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+        </React.Fragment>
       )}
 
       {/* Economic Impact */}
       {selectedReportType === 'economic' && (
-        <Tabs defaultValue="income" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="income">Income</TabsTrigger>
-            <TabsTrigger value="incomeBySkill">Income by Skill</TabsTrigger>
-            <TabsTrigger value="correlations">Correlations</TabsTrigger>
-          </TabsList>
+        <React.Fragment>
 
-          <TabsContent value="income" className="space-y-6">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <Card>
               <CardHeader>
                 <CardTitle>Income Distribution</CardTitle>
@@ -399,11 +428,11 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="range" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" name="Number of People" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" name="Number of People" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -420,23 +449,26 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="range" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" name="Number of People" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" name="Number of People" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          <TabsContent value="incomeBySkill" className="space-y-6">
+
+          </div>
+
+          <div className="mb-4">
+
             <Card>
               <CardHeader>
                 <CardTitle>Average Income by Skill</CardTitle>
               </CardHeader>
-              <CardContent className="h-96">
+              <CardContent className="h-[150vh]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={incomeBySkillData}
@@ -453,14 +485,14 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="correlations" className="space-y-6">
+          <div className="mb-4">
             <Card>
               <CardHeader>
                 <CardTitle>Experience vs Income</CardTitle>
               </CardHeader>
-              <CardContent className="h-96">
+              <CardContent className="h-[150vh]">
                 <ResponsiveContainer width="100%" height="100%">
                   <ScatterChart
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
@@ -474,25 +506,23 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </React.Fragment>
+
+
+
       )}
 
       {/* Skills Distribution */}
       {selectedReportType === 'skills' && (
-        <Tabs defaultValue="skillDistribution" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="skillDistribution">Skills</TabsTrigger>
-            <TabsTrigger value="employment">Employment</TabsTrigger>
-            <TabsTrigger value="experience">Experience</TabsTrigger>
-          </TabsList>
+        <React.Fragment>
+          <div className="mb-4">
 
-          <TabsContent value="skillDistribution" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Skill Distribution</CardTitle>
               </CardHeader>
-              <CardContent className="h-96">
+              <CardContent className="h-[90vh]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={skillData}
@@ -509,12 +539,13 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-
+          </div>
+          <div className="mb-4">
             <Card>
               <CardHeader>
                 <CardTitle>Skill Distribution by Employment Type</CardTitle>
               </CardHeader>
-              <CardContent className="h-96">
+              <CardContent className="h-[90vh]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={skillByEmploymentData}
@@ -541,9 +572,9 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
 
-          <TabsContent value="employment" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Employment Type Distribution</CardTitle>
@@ -571,9 +602,7 @@ const Reports = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          <TabsContent value="experience" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Experience Distribution</CardTitle>
@@ -585,17 +614,18 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="range" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" name="Number of People" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" name="Number of People" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </React.Fragment>
+
       )}
 
       {/* Growth Analytics */}
@@ -618,11 +648,11 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="count" name="Registrations" stroke="#3b82f6" activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="value" name="Registrations" stroke="#3b82f6" activeDot={{ r: 8 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -641,11 +671,11 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="count" name="Total Registrations" stroke="#10b981" fill="#10b98133" />
+                    <Area type="monotone" dataKey="value" name="Total Registrations" stroke="#10b981" fill="#10b98133" />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>

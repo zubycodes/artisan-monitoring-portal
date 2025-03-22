@@ -31,7 +31,7 @@ const Navbar = () => {
     document.body.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
-  
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -39,7 +39,11 @@ const Navbar = () => {
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
-  
+  const logout = () => {
+    localStorage.removeItem('ussr');
+    navigate('/login');
+  };
+
   return (
     <nav className="top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/11 border-b border-slate-200 px-8 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -58,6 +62,14 @@ const Navbar = () => {
             >
               <LayoutDashboard className="h-4 w-4" />
               <span>Dashboard</span>
+            </Button>
+            <Button
+              variant={isActive('/artisans') ? "secondary" : "ghost"}
+              className="gap-2"
+              onClick={() => navigate('/artisans')}
+            >
+              <Users className="h-4 w-4" />
+              <span>Artisans</span>
             </Button>
             <Button
               variant={isActive('/manage') ? "secondary" : "ghost"}
@@ -110,7 +122,7 @@ const Navbar = () => {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive focus:text-destructive">
+              <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Logout</span>
               </DropdownMenuItem>
