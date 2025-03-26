@@ -11,7 +11,8 @@ import {
   ChevronDown,
   LogOut,
   Moon,
-  Sun
+  Sun,
+  SettingsIcon
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,12 +26,17 @@ import {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [user, setUser]: any = useState({});
   const [theme, setTheme] = useState(localStorage.getItem("theme") === "dark" ? "dark" : "light");
 
   useEffect(() => {
     document.body.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem("ussr")));
+  }, [navigate]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -52,7 +58,7 @@ const Navbar = () => {
             <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
               <span className="text-white font-semibold">A</span>
             </div>
-            <span className="font-serif text-xl font-semibold">Artisan Portal</span>
+            <span className="font-serif text-xl font-semibold">Artisan PSIC</span>
           </div>
           <div className="hidden md:flex items-center space-x-1">
             <Button
@@ -64,22 +70,6 @@ const Navbar = () => {
               <span>Dashboard</span>
             </Button>
             <Button
-              variant={isActive('/artisans') ? "secondary" : "ghost"}
-              className="gap-2"
-              onClick={() => navigate('/artisans')}
-            >
-              <Users className="h-4 w-4" />
-              <span>Artisans</span>
-            </Button>
-            <Button
-              variant={isActive('/manage') ? "secondary" : "ghost"}
-              className="gap-2"
-              onClick={() => navigate('/manage')}
-            >
-              <Users className="h-4 w-4" />
-              <span>Manage</span>
-            </Button>
-            <Button
               variant={isActive('/map') ? "secondary" : "ghost"}
               className="gap-2"
               onClick={() => navigate('/map')}
@@ -88,12 +78,28 @@ const Navbar = () => {
               <span>Map</span>
             </Button>
             <Button
+              variant={isActive('/artisans') ? "secondary" : "ghost"}
+              className="gap-2"
+              onClick={() => navigate('/artisans')}
+            >
+              <Users className="h-4 w-4" />
+              <span>Artisans</span>
+            </Button>
+            <Button
               variant={isActive('/reports') ? "secondary" : "ghost"}
               className="gap-2"
               onClick={() => navigate('/reports')}
             >
               <BarChart4 className="h-4 w-4" />
               <span>Reports</span>
+            </Button>
+            <Button
+              variant={isActive('/manage') ? "secondary" : "ghost"}
+              className="gap-2"
+              onClick={() => navigate('/manage')}
+            >
+              <SettingsIcon className="h-4 w-4" />
+              <span>Manage</span>
             </Button>
           </div>
         </div>
@@ -108,20 +114,13 @@ const Navbar = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2">
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                  <span className="text-sm font-medium">AS</span>
-                </div>
-                <span className="hidden md:inline-block">Admin</span>
+                <span className="hidden md:inline-block">{user.username}</span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Logout</span>

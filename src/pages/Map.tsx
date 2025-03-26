@@ -3,6 +3,18 @@ import Layout from '@/components/layout/Layout';
 import PageHeader from '@/components/layout/PageHeader';
 import GoogleMapReact from 'google-map-react';
 import { districtsLatLong } from './map-config';
+import { useNavigate } from "react-router-dom";
+import { Button } from '@/components/ui/button';
+import { EyeIcon, MapPin } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import ArtisanDetail from './ArtisanDetail';
 
 // Constants
 const API_BASE_URL = 'http://13.239.184.38:6500';
@@ -14,7 +26,17 @@ const DISTRICT_ZOOM = 9;
 
 const Marker = ({ lat, lng, artisan, $hover = false, onClick }) => {
   return (
-    <div className="relative">
+    
+    <div className="relative" onClick={(event) => { event.stopPropagation(); onClick(artisan); }}>
+      {/* <svg xmlns="http://www.w3.org/2000/svg" strokeWidth={3} stroke="#000" fill={artisan.craft_color} width="20px" height="20px" viewBox="0 0 1920 1920">
+        <path d="M956.952 0c-362.4 0-657 294.6-657 656.88 0 180.6 80.28 347.88 245.4 511.56 239.76 237.96 351.6 457.68 351.6 691.56v60h120v-60c0-232.8 110.28-446.16 357.6-691.44 165.12-163.8 245.4-331.08 245.4-511.68 0-362.28-294.6-656.88-663-656.88" />
+      </svg> */}
+
+      {/*  <svg xmlns="http://www.w3.org/2000/svg" strokeWidth={3} stroke="#000" fill={artisan.craft_color} width="20px" height="20px" viewBox="0 0 1920 1920">
+        <path d="M1290 1083.396c-114.12 113.16-253.68 269.88-332.04 466.8-76.92-199.08-215.16-354.84-327.96-466.92-141.36-140.04-210-279.48-210-426.48 0-295.92 240.84-536.76 543.12-536.76 296.04 0 536.88 240.84 536.88 536.76 0 147-68.64 286.44-210 426.6M956.88.036C594.72.036 300 294.636 300 656.796c0 180.6 80.28 348 245.4 511.68 239.76 237.84 351.48 457.56 351.48 691.56v60h120v-60c0-232.92 110.4-446.16 357.72-691.44 165.12-163.8 245.4-331.2 245.4-511.8C1620 294.636 1325.28.036 956.88.036" fill-rule="evenodd" />
+      </svg>
+      */}
+      {/* <MapPin onClick={(event) => { event.stopPropagation(); onClick(artisan); }} size={20} style={{ color: artisan.craft_color }} /> */}
       <img
         src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
         width="20"
@@ -31,6 +53,8 @@ const InfoWindow = ({ lat, lng, artisanId, onClose }) => {
   const [artisanData, setArtisanData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true; // Flag to prevent state updates after unmount
@@ -181,6 +205,28 @@ const InfoWindow = ({ lat, lng, artisanId, onClose }) => {
                 {artisanData.district_name || "N/A"}, {artisanData.tehsil_name || ""}
               </div>
             </div>
+            <div className="flex w-full justify-end text-sm mt-1">
+               <Button variant="outline" className="small" onClick={() => window.open(`/artisans/${artisanData.id}`, '_blank')}>
+                <EyeIcon className="h-4 w-4 mr-2" />
+                View Details
+              </Button>
+              {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <EyeIcon className="h-4 w-4" />
+                    View
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>{artisanData.name} {artisanData.father_name}</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex-grow overflow-y-auto">
+                    <ArtisanDetail artisan_id={artisanData.id} />
+                  </div>
+                </DialogContent>
+              </Dialog> */}
+            </div>
 
 
             {/* Status indicator */}
@@ -220,6 +266,7 @@ const FilterSection = ({ data, onChange }) => {
           <select
             id="division"
             onChange={onChange}
+            disabled={true}
             className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline"
           >
             <option value="Select">Select</option>
@@ -250,6 +297,7 @@ const FilterSection = ({ data, onChange }) => {
           <select
             id="tehsil"
             onChange={onChange}
+            disabled={true}
             className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline"
           >
             <option value="Select">Select</option>
@@ -265,6 +313,7 @@ const FilterSection = ({ data, onChange }) => {
             id="unionCouncil"
             className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline"
             placeholder="UC"
+            disabled={true}
           />
         </div>
       </div>
@@ -275,6 +324,7 @@ const FilterSection = ({ data, onChange }) => {
           <select
             id="craft"
             onChange={onChange}
+            disabled={true}
             className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline"
           >
             <option value="Select">Select</option>
@@ -289,6 +339,7 @@ const FilterSection = ({ data, onChange }) => {
           <select
             id="category"
             onChange={onChange}
+            disabled={true}
             className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline"
           >
             <option value="Select">Select</option>
@@ -304,6 +355,7 @@ const FilterSection = ({ data, onChange }) => {
         <select
           id="techniqueSkills"
           onChange={onChange}
+          disabled={true}
           className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline"
         >
           <option value="Select">Select</option>
@@ -315,7 +367,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="product" className="block text-sm font-bold mb-2">Major Product:</label>
-        <select id="product" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="product"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Product 1</option>
           <option>Product 2</option>
           <option>Product 3</option>
@@ -324,7 +378,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="employment" className="block text-sm font-bold mb-2">Employment Type:</label>
-        <select id="employment" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="employment"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Full-time</option>
           <option>Part-time</option>
           <option>Self-employed</option>
@@ -333,7 +389,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="loan" className="block text-sm font-bold mb-2">Seeking Loan:</label>
-        <select id="loan" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="loan"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -341,7 +399,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="machinery" className="block text-sm font-bold mb-2">Has Machinery:</label>
-        <select id="machinery" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="machinery"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -349,7 +409,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="training" className="block text-sm font-bold mb-2">Has Training:</label>
-        <select id="training" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="training"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -357,7 +419,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="inherited" className="block text-sm font-bold mb-2">Inherited Skills:</label>
-        <select id="inherited" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="inherited"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -365,7 +429,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="financial" className="block text-sm font-bold mb-2">Financial Assistance Required:</label>
-        <select id="financial" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="financial"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -373,7 +439,9 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="technical" className="block text-sm font-bold mb-2">Technical Assistance Required:</label>
-        <select id="technical" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
+        <select id="technical"
+          disabled={true}
+          className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -381,17 +449,23 @@ const FilterSection = ({ data, onChange }) => {
 
       <div className="mb-4">
         <label htmlFor="dependents" className="block text-sm font-bold mb-2">Dependents Count:</label>
-        <input type="number" id="dependents" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline" />
+        <input type="number"
+          disabled={true}
+          id="dependents" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline" />
       </div>
 
       <div className="mb-4">
         <label htmlFor="experience" className="block text-sm font-bold mb-2">Experience:</label>
-        <input type="number" id="experience" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline" />
+        <input type="number"
+          disabled={true}
+          id="experience" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline" />
       </div>
 
       <div className="mb-4">
         <label htmlFor="income" className="block text-sm font-bold mb-2">Avg Monthly Income:</label>
-        <input type="number" id="income" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline" />
+        <input type="number"
+          disabled={true}
+          id="income" className="shadow appearance-none border w-full py-2 px-3 bg-transparent leading-tight focus:outline-none focus:shadow-outline" />
       </div>
     </div>
   );
@@ -475,11 +549,11 @@ const Map = () => {
         setMapData(prevData => ({
           ...prevData,
           artisans: results[0],
-          crafts: results[2],
-          categories: results[3],
-          techniqueSkills: results[4],
-          users: results[5],
-          geoLevel: results[6]
+          crafts: results[1],
+          categories: results[2],
+          techniqueSkills: results[3],
+          users: results[4],
+          geoLevel: results[5]
         }));
       } catch (error) {
         console.error('Error fetching data:', error);

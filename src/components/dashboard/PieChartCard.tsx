@@ -52,10 +52,19 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 const PieChartCard = ({ title, data, className, loading }: PieChartCardProps) => {
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="mt-2 text-gray-600">Loading...</p>
-      </div>
+      <Card className={cn("hover-lift", className)}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[240px] w-full">
+            <div className="flex flex-col items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="mt-2 text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
   return (

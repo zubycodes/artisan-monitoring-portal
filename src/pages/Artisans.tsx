@@ -40,7 +40,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { EyeIcon, PencilIcon, TrashIcon, MoreHorizontal, Filter, Download } from "lucide-react";
+import { EyeIcon, PencilIcon, TrashIcon, MoreHorizontal, Filter, Download, PrinterIcon } from "lucide-react";
+import Layout from "@/components/layout/Layout";
+import ArtisanDetail from "./ArtisanDetail";
 const API_BASE_URL = 'http://13.239.184.38:6500';
 
 const ArtisansList = () => {
@@ -51,17 +53,18 @@ const ArtisansList = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
   const [visibleColumns, setVisibleColumns] = useState({
-    id: true,
     name: true,
-    gender: true,
-    skill_id: true,
-    contact_no: true,
-    avg_monthly_income: true,
+    gender: false,
+    skill_name: true,
+    contact_no: false,
+    avg_monthly_income: false,
     experience: true,
     has_training: true,
     loan_status: true,
-    isActive: true,
+    financial_assistance: true,
+    technical_assistance: true,
   });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -163,20 +166,19 @@ const ArtisansList = () => {
   };
 
   return (
-    <div className="container mx-auto py-6">
+
+    <Layout>
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Artisans Directory</CardTitle>
               <CardDescription>
-                Manage and view all registered artisans
+                View all artisans
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => navigate('/artisans/new')}>
-                Add New Artisan
-              </Button>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -232,16 +234,17 @@ const ArtisansList = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {visibleColumns.id && <TableHead>ID</TableHead>}
+                      <TableHead>SR.</TableHead>
                       {visibleColumns.name && <TableHead>Name</TableHead>}
                       {visibleColumns.gender && <TableHead>Gender</TableHead>}
-                      {visibleColumns.skill_id && <TableHead>Skill</TableHead>}
+                      {visibleColumns.skill_name && <TableHead>Skill</TableHead>}
                       {visibleColumns.contact_no && <TableHead>Contact</TableHead>}
                       {visibleColumns.avg_monthly_income && <TableHead>Monthly Income</TableHead>}
                       {visibleColumns.experience && <TableHead>Experience (Years)</TableHead>}
                       {visibleColumns.has_training && <TableHead>Training</TableHead>}
                       {visibleColumns.loan_status && <TableHead>Loan Status</TableHead>}
-                      {visibleColumns.isActive && <TableHead>Status</TableHead>}
+                      {visibleColumns.financial_assistance && <TableHead> Financial Assistance Required</TableHead>}
+                      {visibleColumns.technical_assistance && <TableHead> Technial Assistance Required</TableHead>}
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -253,13 +256,13 @@ const ArtisansList = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      currentArtisans.map((artisan) => (
+                      currentArtisans.map((artisan, index) => (
                         <TableRow key={artisan.id} className="hover:bg-gray-50 cursor-pointer">
-                          {visibleColumns.id && <TableCell>{artisan.id}</TableCell>}
-                          {visibleColumns.name && <TableCell className="font-medium">{artisan.name}</TableCell>}
+                          <TableCell className="text-center">{(index + 1)}.</TableCell>
+                          {visibleColumns.name && <TableCell className="font-medium">{artisan.name} {artisan.father_name}</TableCell>}
                           {visibleColumns.gender && <TableCell>{artisan.gender}</TableCell>}
-                          {visibleColumns.skill_id && (
-                            <TableCell>{getSkillName(artisan.skill_id)}</TableCell>
+                          {visibleColumns.skill_name && (
+                            <TableCell><Badge className="py-1 px-4" style={{ backgroundColor: artisan.skill_color, color: 'black' }}>{artisan.skill_name}</Badge></TableCell>
                           )}
                           {visibleColumns.contact_no && <TableCell>{artisan.contact_no}</TableCell>}
                           {visibleColumns.avg_monthly_income && (
@@ -277,44 +280,52 @@ const ArtisansList = () => {
                           )}
                           {visibleColumns.loan_status && (
                             <TableCell>
-                              {artisan.loan_status ? (
-                                <Badge variant="warning">Active</Badge>
+                              {artisan.loan_status === 'Yes' ? (
+                                <Badge variant="warning">Yes</Badge>
                               ) : (
-                                <Badge variant="outline">None</Badge>
+                                <Badge variant="outline">No</Badge>
                               )}
                             </TableCell>
                           )}
-                          {visibleColumns.isActive && (
+                          {visibleColumns.financial_assistance && (
                             <TableCell>
-                              {artisan.isActive ? (
-                                <Badge className="bg-green-100 text-green-800">Active</Badge>
+                              {artisan.financial_assistance === 'Yes' ? (
+                                <Badge variant="warning">Yes</Badge>
                               ) : (
-                                <Badge variant="secondary">Inactive</Badge>
+                                <Badge variant="outline">No</Badge>
+                              )}
+                            </TableCell>
+                          )}
+                          {visibleColumns.technical_assistance && (
+                            <TableCell>
+                              {artisan.technical_assistance === 'Yes' ? (
+                                <Badge variant="warning">Yes</Badge>
+                              ) : (
+                                <Badge variant="outline">No</Badge>
                               )}
                             </TableCell>
                           )}
                           <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="h-4 w-4" />
+                            <Button className="mr-2" variant="outline" onClick={() => { window.open(`/artisans/${artisan.id}/p`, '_blank') }}>
+                              <PrinterIcon />
+                            </Button>
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button variant="outline">
+                                  <EyeIcon className="h-4 w-4" />
+                                  View
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewArtisan(artisan.id)}>
-                                  <EyeIcon className="h-4 w-4 mr-2" />
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleEditArtisan(artisan.id)}>
-                                  <PencilIcon className="h-4 w-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600">
-                                  <TrashIcon className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh] flex flex-col">
+                                <DialogHeader>
+                                  <DialogTitle>{artisan.name} {artisan.father_name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="flex-grow overflow-y-auto">
+                                  <ArtisanDetail artisan_id={artisan.id} />
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+
                           </TableCell>
                         </TableRow>
                       ))
@@ -370,8 +381,8 @@ const ArtisansList = () => {
             </>
           )}
         </CardContent>
-      </Card>
-    </div>
+      </Card >
+    </Layout >
   );
 };
 

@@ -30,12 +30,17 @@ const Dashboard = () => {
      { name: 'Female', value: 35, color: '#ec4899' },
    ]; */
 
-  const colors = [
-    '#3b82f6',
-    '#8b5cf6',
-    '#10b981',
-    '#f59e0b',
-    '#6b7280',
+   const colors = [
+    '#3b82f6', // Blue
+    '#8b5cf6', // Purple
+    '#10b981', // Green
+    '#f59e0b', // Orange
+    '#ef4444', // Red
+    '#fcd34d', // Yellow
+    '#06b6d4', // Cyan
+    '#ec4899', // Magenta
+    '#84cc16', // Lime Green
+    '#fb7185', // Coral
   ];
 
   const skillData = [
@@ -120,7 +125,7 @@ const Dashboard = () => {
   return (
     <Layout>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <StatCard
           className="stat-card-1"
           title="Total Artisans"
@@ -129,13 +134,13 @@ const Dashboard = () => {
           icon={<Users className="h-5 w-5" />}
           trend={{ value: 12, isPositive: true }}
         />
-        <StatCard
+       {/*  <StatCard
           className="stat-card-2"
           title="Crafts"
           value={dashboardData.total_active_artisans}
           description="Different types of crafts"
           icon={<Palette className="h-5 w-5" />}
-        />
+        /> */}
         <StatCard
           className="stat-card-3"
           title="Regions Covered"

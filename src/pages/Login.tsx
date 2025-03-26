@@ -45,7 +45,7 @@ const Login: React.FC = () => {
                 console.log('Login successful:', data);
                 // Store token if provided in response
                 if (data) {
-                    localStorage.setItem('ussr', data);
+                    localStorage.setItem('ussr', JSON.stringify(data));
                 }
                 if (rememberMe) {
                     localStorage.setItem('rememberMe', 'true');
@@ -76,6 +76,9 @@ const Login: React.FC = () => {
                     </div>
 
                     <div className="mb-12 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
+                    <img className="mx-auto" width="300" height="300" src="https://artisan.psic-erp.com/Content/images/bg/Logo.jpeg" alt="" />
+
+
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
                                 <p className="mb-0 mr-4 text-lg">Sign in</p>

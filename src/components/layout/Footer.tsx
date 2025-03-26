@@ -12,10 +12,10 @@ const Footer = () => {
             <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
               <span className="text-white font-semibold text-xs">A</span>
             </div>
-            <span className="text-sm text-muted-foreground">Punjab Artisan Monitoring Portal</span>
+            <span className="text-sm text-muted-foreground">Artisan PSIC</span>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-            <span className="text-xs text-muted-foreground">© 2023 Punjab Artisan Initiative</span>
+            <span className="text-xs text-muted-foreground">© 2025 PSIC</span>
             <div className="flex items-center gap-4">
               <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
