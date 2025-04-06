@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
-import Index from "./pages/Index";
+import { Dashboard as Index } from "./pages/Index";
 import Manage from "./pages/Manage";
 import Map from "./pages/Map";
 import Reports from "./pages/Reports";
@@ -33,14 +33,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes><Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<Index />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
-          <Route path="/artisans" element={<Artisans />} />
-          <Route path="/artisans/:id" element={<ArtisanDetailWrapper />} />
-          <Route path="/artisans/:id/:p" element={<ArtisanDetailWrapper />} />
-          <Route path="/manage" element={<Manage />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/reports" element={<Reports />} />
+          <Route path="/artisans" element={<ProtectedRoute><Artisans /></ProtectedRoute>} />
+          <Route path="/artisans/:id" element={<ProtectedRoute><ArtisanDetailWrapper /></ProtectedRoute>} />
+          <Route path="/artisans/:id/:p" element={<ProtectedRoute><ArtisanDetailWrapper /></ProtectedRoute>} />
+          <Route path="/manage" element={<ProtectedRoute><Manage /></ProtectedRoute>} />
+          <Route path="/map" element={<ProtectedRoute><Map /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

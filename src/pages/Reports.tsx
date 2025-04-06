@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import Layout from '@/components/layout/Layout';
-import PageHeader from '@/components/layout/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useEffect, useState } from "react";
+import Layout from "@/components/layout/Layout";
+import PageHeader from "@/components/layout/PageHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   BarChart,
   Bar,
@@ -28,20 +28,21 @@ import {
   Scatter,
   PieChart,
   Pie,
-  Cell
-} from 'recharts';
-import { DownloadCloud, FileText, LayoutGrid, Loader2 } from 'lucide-react';
+  Cell,
+} from "recharts";
+import { DownloadCloud, FileText, LayoutGrid, Loader2 } from "lucide-react";
+import { DashboardFilters } from "./Index";
 
 // Base API URL - update this with your actual API base URL
-const API_BASE_URL = 'http://13.239.184.38:6500';
+const API_BASE_URL = "http://13.239.184.38:6500";
 
 const Reports = () => {
   // State for various chart data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedReportType, setSelectedReportType] = useState('demographic');
-  const [selectedTimePeriod, setSelectedTimePeriod] = useState('6months');
-  const [selectedRegion, setSelectedRegion] = useState('all');
+  const [selectedReportType, setSelectedReportType] = useState("demographic");
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState("6months");
+  const [selectedRegion, setSelectedRegion] = useState("all");
 
   // States for different data tables
   const [artisans, setArtisans] = useState([]);
@@ -50,6 +51,18 @@ const Reports = () => {
   const [techniqueSkills, setTechniqueSkills] = useState([]);
   const [education, setEducation] = useState([]);
   const [users, setUsers] = useState([]);
+
+  const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [tehsils, setTehsils] = useState([]);
+  const [categoriesData, setCategoriesData] = useState([]);
+
+  const [division, setDivision] = useState("");
+  const [district, setDistrict] = useState("");
+  const [gender, setGender] = useState("");
+  const [craft, setCraft] = useState("");
+  const [category, setCategory] = useState("");
+  const [tehsil, setTehsil] = useState("");
 
   // States for derived chart data
   const [genderData, setGenderData] = useState([]);
@@ -65,11 +78,21 @@ const Reports = () => {
   const [genderByTehsilData, setGenderByTehsilData] = useState([]);
   const [skillByEmploymentData, setSkillByEmploymentData] = useState([]);
   const [registrationsTimeData, setRegistrationsTimeData] = useState([]);
-  const [cumulativeRegistrationsData, setCumulativeRegistrationsData] = useState([]);
+  const [cumulativeRegistrationsData, setCumulativeRegistrationsData] =
+    useState([]);
   const [experienceVsIncomeData, setExperienceVsIncomeData] = useState([]);
 
   // COLORS for pie charts and other visualizations
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#8dd1e1",
+  ];
 
   // Fetch raw data from all tables
   useEffect(() => {
@@ -125,26 +148,72 @@ const Reports = () => {
           setCumulativeRegistrationsData(data.cumulativeRegistrations);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setError('Failed to load data. Please try again later.');
+        console.error("Error fetching data:", error);
+        setError("Failed to load data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchRawData();
+
+    const fetchFiltersData = async (
+      division: string,
+      district: string,
+      gender: string,
+      craft: string,
+      category: string,
+      tehsil: string
+    ) => {
+      setLoading(true);
+      try {
+        const [
+          divisionsResponse,
+          districtsResponse,
+          tehsilsResponse,
+          craftsResponse,
+          categoriesResponse,
+        ] = await Promise.all([
+          fetch(`${API_BASE_URL}/geo_level?code_length=3`),
+          fetch(`${API_BASE_URL}/geo_level?code_length=6`),
+          fetch(`${API_BASE_URL}/geo_level?code_length=9`),
+          fetch(`${API_BASE_URL}/crafts`),
+          fetch(`${API_BASE_URL}/categories`),
+        ]);
+
+        const divisionsData = await divisionsResponse.json();
+        const districtsData = await districtsResponse.json();
+        const tehsilsData = await tehsilsResponse.json();
+        const craftsData = await craftsResponse.json();
+        const categoriesData = await categoriesResponse.json();
+
+        setDivisions(divisionsData);
+        setDistricts(districtsData);
+        setTehsils(tehsilsData);
+        setCrafts(craftsData);
+        setCategoriesData(categoriesData);
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiltersData(division, district, gender, craft, category, tehsil);
   }, []);
 
   // Function to export data
   const handleExport = () => {
     // Implement export functionality
-    alert('Export functionality will be implemented here');
+    alert("Export functionality will be implemented here");
   };
 
   // Function to save as template
   const handleSaveTemplate = () => {
     // Implement save as template functionality
-    alert('Save as template functionality will be implemented here');
+    alert("Save as template functionality will be implemented here");
   };
 
   // Render loading state
@@ -188,7 +257,11 @@ const Reports = () => {
             <DownloadCloud className="h-4 w-4" />
             <span>Export</span>
           </Button>
-          <Button variant="outline" className="gap-1.5" onClick={handleSaveTemplate}>
+          <Button
+            variant="outline"
+            className="gap-1.5"
+            onClick={handleSaveTemplate}
+          >
             <FileText className="h-4 w-4" />
             <span>Save as Template</span>
           </Button>
@@ -197,9 +270,24 @@ const Reports = () => {
 
       <Card className="mb-6">
         <CardContent className="pt-6">
+          <DashboardFilters
+            divisions={divisions}
+            districts={districts}
+            tehsils={tehsils}
+            crafts={crafts}
+            categories={categoriesData}
+            setDivision={setDivision}
+            setDistrict={setDistrict}
+            setGender={setGender}
+            setCraft={setCraft}
+            setCategory={setCategory}
+            setTehsil={setTehsil}
+          />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Report Type</label>
+              <label className="text-sm font-medium mb-1.5 block">
+                Report Type
+              </label>
               <Select
                 value={selectedReportType}
                 onValueChange={setSelectedReportType}
@@ -208,7 +296,9 @@ const Reports = () => {
                   <SelectValue placeholder="Select report type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="demographic">Demographic Analysis</SelectItem>
+                  <SelectItem value="demographic">
+                    Demographic Analysis
+                  </SelectItem>
                   <SelectItem value="economic">Economic Impact</SelectItem>
                   <SelectItem value="skills">Skills Distribution</SelectItem>
                   <SelectItem value="growth">Growth Analytics</SelectItem>
@@ -216,7 +306,9 @@ const Reports = () => {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Time Period</label>
+              <label className="text-sm font-medium mb-1.5 block">
+                Time Period
+              </label>
               <Select
                 value={selectedTimePeriod}
                 onValueChange={setSelectedTimePeriod}
@@ -234,18 +326,18 @@ const Reports = () => {
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">Region</label>
-              <Select
-                value={selectedRegion}
-                onValueChange={setSelectedRegion}
-              >
+              <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select region" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Regions</SelectItem>
-                  {tehsilData && tehsilData.map((item, index) => (
-                    <SelectItem key={index} value={item.name.toLowerCase()}>{item.name}</SelectItem>
-                  ))}
+                  {tehsilData &&
+                    tehsilData.map((item, index) => (
+                      <SelectItem key={index} value={item.name.toLowerCase()}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -254,10 +346,8 @@ const Reports = () => {
       </Card>
 
       {/* Demographic Analysis */}
-      {selectedReportType === 'demographic' && (
+      {selectedReportType === "demographic" && (
         <React.Fragment>
-
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <Card>
               <CardHeader>
@@ -271,13 +361,18 @@ const Reports = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={120}
                       fill="#8884d8"
                       dataKey="value"
                     >
                       {genderData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -297,15 +392,19 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 12 }}
-                    />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis
                       tickFormatter={(value) => value.toLocaleString()}
-                      label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+                      label={{
+                        value: "Count",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { textAnchor: "middle" },
+                      }}
                     />
-                    <Tooltip formatter={(value) => [value.toLocaleString(), 'Count']} />
+                    <Tooltip
+                      formatter={(value) => [value.toLocaleString(), "Count"]}
+                    />
                     <Legend />
                     <Bar
                       dataKey="value"
@@ -320,7 +419,6 @@ const Reports = () => {
             </Card>
           </div>
           <div className="mb-4">
-
             <Card>
               <CardHeader>
                 <CardTitle>Education Level Distribution</CardTitle>
@@ -342,9 +440,16 @@ const Reports = () => {
                     />
                     <YAxis
                       tickFormatter={(value) => value.toLocaleString()}
-                      label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+                      label={{
+                        value: "Count",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { textAnchor: "middle" },
+                      }}
                     />
-                    <Tooltip formatter={(value) => [value.toLocaleString(), 'Count']} />
+                    <Tooltip
+                      formatter={(value) => [value.toLocaleString(), "Count"]}
+                    />
                     <Legend wrapperStyle={{ paddingTop: 10 }} />
                     <Bar
                       dataKey="value"
@@ -359,7 +464,6 @@ const Reports = () => {
             </Card>
           </div>
           <div className="mb-4">
-
             <Card>
               <CardHeader>
                 <CardTitle>Geographical Distribution by Tehsil</CardTitle>
@@ -376,14 +480,18 @@ const Reports = () => {
                     <YAxis dataKey="name" type="category" width={100} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" name="Number of People" fill="#f59e0b" radius={[0, 4, 4, 0]} />
+                    <Bar
+                      dataKey="value"
+                      name="Number of People"
+                      fill="#f59e0b"
+                      radius={[0, 4, 4, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
           <div className="mb-4">
-
             <Card>
               <CardHeader>
                 <CardTitle>Gender Distribution by Tehsil</CardTitle>
@@ -395,27 +503,47 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="tehsil" angle={-45} textAnchor="end" height={60} />
+                    <XAxis
+                      dataKey="tehsil"
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="Male" name="Male" stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Female" name="Female" stackId="a" fill="#ec4899" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Other" name="Other" stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="Male"
+                      name="Male"
+                      stackId="a"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="Female"
+                      name="Female"
+                      stackId="a"
+                      fill="#ec4899"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="Other"
+                      name="Other"
+                      stackId="a"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
-
         </React.Fragment>
       )}
 
       {/* Economic Impact */}
-      {selectedReportType === 'economic' && (
+      {selectedReportType === "economic" && (
         <React.Fragment>
-
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <Card>
               <CardHeader>
@@ -432,7 +560,12 @@ const Reports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" name="Number of People" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="value"
+                      name="Number of People"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -453,17 +586,19 @@ const Reports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" name="Number of People" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="value"
+                      name="Number of People"
+                      fill="#f59e0b"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-
-
           </div>
 
           <div className="mb-4">
-
             <Card>
               <CardHeader>
                 <CardTitle>Average Income by Skill</CardTitle>
@@ -480,7 +615,12 @@ const Reports = () => {
                     <YAxis dataKey="skill" type="category" width={100} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="avgIncome" name="Average Income" fill="#10b981" radius={[0, 4, 4, 0]} />
+                    <Bar
+                      dataKey="avgIncome"
+                      name="Average Income"
+                      fill="#10b981"
+                      radius={[0, 4, 4, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -498,26 +638,34 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" dataKey="experience" name="Years of Experience" />
-                    <YAxis type="number" dataKey="income" name="Monthly Income" />
-                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                    <Scatter name="Experience vs Income" data={experienceVsIncomeData} fill="#8884d8" />
+                    <XAxis
+                      type="number"
+                      dataKey="experience"
+                      name="Years of Experience"
+                    />
+                    <YAxis
+                      type="number"
+                      dataKey="income"
+                      name="Monthly Income"
+                    />
+                    <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                    <Scatter
+                      name="Experience vs Income"
+                      data={experienceVsIncomeData}
+                      fill="#8884d8"
+                    />
                   </ScatterChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
         </React.Fragment>
-
-
-
       )}
 
       {/* Skills Distribution */}
-      {selectedReportType === 'skills' && (
+      {selectedReportType === "skills" && (
         <React.Fragment>
           <div className="mb-4">
-
             <Card>
               <CardHeader>
                 <CardTitle>Skill Distribution</CardTitle>
@@ -534,7 +682,12 @@ const Reports = () => {
                     <YAxis dataKey="name" type="category" width={120} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" name="Number of People" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                    <Bar
+                      dataKey="value"
+                      name="Number of People"
+                      fill="#3b82f6"
+                      radius={[0, 4, 4, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -552,12 +705,17 @@ const Reports = () => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="skill" angle={-45} textAnchor="end" height={60} />
+                    <XAxis
+                      dataKey="skill"
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
                     <YAxis />
                     <Tooltip />
                     <Legend />
                     {Object.keys(skillByEmploymentData[0] || {})
-                      .filter(key => key !== 'skill')
+                      .filter((key) => key !== "skill")
                       .map((key, index) => (
                         <Bar
                           key={key}
@@ -574,7 +732,6 @@ const Reports = () => {
             </Card>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-
             <Card>
               <CardHeader>
                 <CardTitle>Employment Type Distribution</CardTitle>
@@ -587,13 +744,18 @@ const Reports = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={120}
                       fill="#8884d8"
                       dataKey="value"
                     >
                       {employmentTypeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -618,22 +780,28 @@ const Reports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" name="Number of People" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="value"
+                      name="Number of People"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
         </React.Fragment>
-
       )}
 
       {/* Growth Analytics */}
-      {selectedReportType === 'growth' && (
+      {selectedReportType === "growth" && (
         <Tabs defaultValue="registrationsTime" className="space-y-6">
           <TabsList className="grid grid-cols-2 w-full max-w-md">
             <TabsTrigger value="registrationsTime">Registrations</TabsTrigger>
-            <TabsTrigger value="cumulativeGrowth">Cumulative Growth</TabsTrigger>
+            <TabsTrigger value="cumulativeGrowth">
+              Cumulative Growth
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="registrationsTime" className="space-y-6">
@@ -652,7 +820,13 @@ const Reports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="value" name="Registrations" stroke="#3b82f6" activeDot={{ r: 8 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      name="Registrations"
+                      stroke="#3b82f6"
+                      activeDot={{ r: 8 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -675,7 +849,13 @@ const Reports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="value" name="Total Registrations" stroke="#10b981" fill="#10b98133" />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      name="Total Registrations"
+                      stroke="#10b981"
+                      fill="#10b98133"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
