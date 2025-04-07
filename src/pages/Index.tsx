@@ -25,6 +25,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import Loader from "@/components/layout/Loader";
 
 const API_BASE_URL = "http://13.239.184.38:6500";
 
@@ -153,7 +154,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <Layout>
-        <div>Loading...</div>
+        <Loader />
       </Layout>
     );
   }
