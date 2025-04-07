@@ -14,10 +14,12 @@ const Login: React.FC = () => {
   // Artisan craft images
   const artisanImages = [
     "https://processjunction.com/wp-content/artisan/pexels-mccutcheon-1153895.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-hadyanphotograph-1328495.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-andiravsanjani-2422574.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-digitalbuggu-191295.jpg",
     "https://processjunction.com/wp-content/artisan/pexels-quang-nguyen-vinh-222549-2166456.jpg",
+    "https://processjunction.com/wp-content/artisan/pexels-hadyanphotograph-1328495.jpg",
+    "https://processjunction.com/wp-content/artisan/pexels-j-mt_photography-628996-3680094.jpg",
+    "https://processjunction.com/wp-content/artisan/pexels-digitalbuggu-191295.jpg",
+    "https://processjunction.com/wp-content/artisan/pexels-orlovamaria-4915832.jpg",
+    "https://processjunction.com/wp-content/artisan/pexels-solodsha-8105116.jpg",
     "https://processjunction.com/wp-content/artisan/pexels-digitalbuggu-352899.jpg",
     "https://processjunction.com/wp-content/artisan/pexels-jadson-thomas-164235-542556.jpg",
   ];
