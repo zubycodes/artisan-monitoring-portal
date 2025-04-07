@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import { DownloadCloud, FileText, LayoutGrid, Loader2 } from "lucide-react";
 import { DashboardFilters } from "./Index";
+import Loader from "@/components/layout/Loader";
 
 // Base API URL - update this with your actual API base URL
 const API_BASE_URL = "http://13.239.184.38:6500";
@@ -192,7 +193,6 @@ const Reports = () => {
         setTehsils(tehsilsData);
         setCrafts(craftsData);
         setCategoriesData(categoriesData);
-
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data. Please try again later.");
@@ -220,10 +220,7 @@ const Reports = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="mt-2 text-gray-600">Loading report data...</p>
-        </div>
+        <Loader />
       </Layout>
     );
   }

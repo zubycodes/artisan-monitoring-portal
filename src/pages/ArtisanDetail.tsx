@@ -1,3 +1,4 @@
+import Loader from "@/components/layout/Loader";
 import { PrinterIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -129,7 +130,7 @@ const ArtisanDetail = ({ artisan_id }) => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return         <Loader />;
   }
 
   if (!artisan) {
