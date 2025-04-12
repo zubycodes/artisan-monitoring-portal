@@ -19,13 +19,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+
 import Loader from "@/components/layout/Loader";
+import FiltersAll from "@/components/dashboard/FiltersAll";
+import { SelectOption } from "@/components/dashboard/Filters";
 
 const API_BASE_URL = "http://13.239.184.38:6500";
 
@@ -40,17 +37,12 @@ const Dashboard = () => {
   const [divisionData, setDivisionData] = useState([]);
   const [ageData, setAgeData] = useState([]);
 
-  const [divisions, setDivisions] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [tehsils, setTehsils] = useState([]);
-  const [crafts, setCrafts] = useState([]);
-  const [categoriesData, setCategoriesData] = useState([]);
-
   const [division, setDivision] = useState("");
   const [district, setDistrict] = useState("");
   const [gender, setGender] = useState("");
   const [craft, setCraft] = useState("");
   const [category, setCategory] = useState("");
+  const [techniquesSkills, setTechniquesSkills] = useState("");
   const [tehsil, setTehsil] = useState("");
 
   const colors = [
@@ -67,14 +59,7 @@ const Dashboard = () => {
   ];
 
   useEffect(() => {
-    const fetchRawData = async (
-      division: string,
-      district: string,
-      gender: string,
-      craft: string,
-      category: string,
-      tehsil: string
-    ) => {
+    const fetchInitialData = async () => {
       setLoading(true);
       try {
         const [
@@ -84,11 +69,6 @@ const Dashboard = () => {
           dashboardResponse,
           topSkillResponse,
           artisansResponse,
-          divisionsResponse,
-          districtsResponse,
-          tehsilsResponse,
-          craftsResponse,
-          categoriesResponse,
         ] = await Promise.all([
           fetch(
             `${API_BASE_URL}/charts/gender?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
@@ -108,11 +88,6 @@ const Dashboard = () => {
           fetch(
             `${API_BASE_URL}/artisans?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
           ),
-          fetch(`${API_BASE_URL}/geo_level?code_length=3`),
-          fetch(`${API_BASE_URL}/geo_level?code_length=6`),
-          fetch(`${API_BASE_URL}/geo_level?code_length=9`),
-          fetch(`${API_BASE_URL}/crafts`),
-          fetch(`${API_BASE_URL}/categories`),
         ]);
 
         const genderData = await genderResponse.json();
@@ -121,11 +96,6 @@ const Dashboard = () => {
         const dashboardData = await dashboardResponse.json();
         const topSkillData = await topSkillResponse.json();
         const artisansData = await artisansResponse.json();
-        const divisionsData = await divisionsResponse.json();
-        const districtsData = await districtsResponse.json();
-        const tehsilsData = await tehsilsResponse.json();
-        const craftsData = await craftsResponse.json();
-        const categoriesData = await categoriesResponse.json();
 
         setGenderData(genderData);
         setDivisionData(divisionData);
@@ -133,24 +103,70 @@ const Dashboard = () => {
         setDashboardData(dashboardData[0]);
         setTopSkills(topSkillData);
         setArtisans(artisansData);
-        setDivisions(divisionsData);
-        setDistricts(districtsData);
-        setTehsils(tehsilsData);
-        setCrafts(craftsData);
-        setCategoriesData(categoriesData);
-
-        console.log(topSkills);
-        console.log(artisans);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load data. Please try again later.");
+        console.error("Error fetching initial data:", error);
+        setError("Failed to load initial data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRawData(division, district, gender, craft, category, tehsil);
-  }, [division, district, gender, craft, category, tehsil]);
+    fetchInitialData();
+  }, []); // Empty deps: runs once on mount
+
+  useEffect(() => {
+    const fetchFilteredData = async () => {
+      try {
+        const [
+          genderResponse,
+          divisionResponse,
+          ageResponse,
+          dashboardResponse,
+          topSkillResponse,
+          artisansResponse,
+        ] = await Promise.all([
+          fetch(
+            `${API_BASE_URL}/charts/gender?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
+          ),
+          fetch(
+            `${API_BASE_URL}/charts/division?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
+          ),
+          fetch(
+            `${API_BASE_URL}/charts/age?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
+          ),
+          fetch(
+            `${API_BASE_URL}/charts/dashboard?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
+          ),
+          fetch(
+            `${API_BASE_URL}/charts/topSkill?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&tehsil=${tehsil}`
+          ),
+          fetch(
+            `${API_BASE_URL}/artisans?division=${division}&district=${district}&gender=${gender}&craft=${craft}&category=${category}&skill=${techniquesSkills}&tehsil=${tehsil}`
+          ),
+        ]);
+        const genderData = await genderResponse.json();
+        const divisionData = await divisionResponse.json();
+        const ageData = await ageResponse.json();
+        const dashboardData = await dashboardResponse.json();
+        const topSkillData = await topSkillResponse.json();
+        const artisansData = await artisansResponse.json();
+
+        setGenderData(genderData);
+        setDivisionData(divisionData);
+        setAgeData(ageData);
+        setDashboardData(dashboardData[0]);
+        setTopSkills(topSkillData);
+        setArtisans(artisansData);
+      } catch (error) {
+        console.error("Error fetching filtered data:", error);
+        setError("Failed to load filtered data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFilteredData();
+  }, [division, district, gender, craft, category, tehsil, techniquesSkills]);
   if (loading) {
     return (
       <Layout>
@@ -167,21 +183,36 @@ const Dashboard = () => {
     );
   }
 
+  const handleFilterChange = (selected: {
+    division: SelectOption;
+    district: SelectOption;
+    tehsil: SelectOption;
+    gender: SelectOption;
+    craft: SelectOption;
+    category: SelectOption;
+    techniques: SelectOption;
+  }) => {
+    // Update the state with the selected values
+    setDivision(
+      selected.division.name == "Select" ? "" : selected.division.name
+    );
+    setDistrict(
+      selected.district.name == "Select" ? "" : selected.district.name
+    );
+    setTehsil(selected.tehsil.name == "Select" ? "" : selected.tehsil.name);
+    setCraft(selected.craft.name == "Select" ? "" : selected.craft.name);
+    setCategory(
+      selected.category.name == "Select" ? "" : selected.category.name
+    );
+    setTechniquesSkills(
+      selected.techniques.name == "Select" ? "" : selected.techniques.name
+    );
+    setGender(selected.gender.name == "Select" ? "" : selected.gender.name);
+  };
+
   return (
     <Layout>
-      <DashboardFilters
-        divisions={divisions}
-        districts={districts}
-        tehsils={tehsils}
-        crafts={crafts}
-        categories={categoriesData}
-        setDivision={setDivision}
-        setDistrict={setDistrict}
-        setGender={setGender}
-        setCraft={setCraft}
-        setCategory={setCategory}
-        setTehsil={setTehsil}
-      />
+      <FiltersAll onChange={handleFilterChange} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <StatCard
@@ -287,131 +318,5 @@ const Dashboard = () => {
     </Layout>
   );
 };
-export { Dashboard, DashboardFilters };
 
-const DashboardFilters = ({
-  divisions,
-  districts,
-  tehsils,
-  crafts,
-  categories,
-  setDivision,
-  setDistrict,
-  setGender,
-  setCraft,
-  setCategory,
-  setTehsil,
-}: any) => {
-  return (
-    <div className="mb-4">
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <div>
-          <label htmlFor="division" className="block text-sm font-bold mb-2">
-            Division:
-          </label>
-          <Select onValueChange={(value) => setDivision(value)}>
-            <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              Select Division
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Select">Select Division</SelectItem>
-              {divisions.map((division) => (
-                <SelectItem key={division.code} value={division.name}>
-                  {division.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="district" className="block text-sm font-bold mb-2">
-            District:
-          </label>
-          <Select onValueChange={(value) => setDistrict(value)}>
-            <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              Select District
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Select">Select District</SelectItem>
-              {districts.map((district) => (
-                <SelectItem key={district.code} value={district.name}>
-                  {district.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="tehsil" className="block text-sm font-bold mb-2">
-            Tehsil:
-          </label>
-          <Select onValueChange={(value) => setTehsil(value)}>
-            <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              Select Tehsil
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Select">Select Tehsil</SelectItem>
-              {tehsils.map((tehsil) => (
-                <SelectItem key={tehsil.code} value={tehsil.name}>
-                  {tehsil.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="gender" className="block text-sm font-bold mb-2">
-            Gender:
-          </label>
-          <Select onValueChange={(value) => setGender(value)}>
-            <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              Select Gender
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Select">Select Gender</SelectItem>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="craft" className="block text-sm font-bold mb-2">
-            Craft:
-          </label>
-          <Select onValueChange={(value) => setCraft(value)}>
-            <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              Select Craft
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Select">Select Craft</SelectItem>
-              {crafts.map((craft) => (
-                <SelectItem key={craft.id} value={craft.name}>
-                  {craft.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="category" className="block text-sm font-bold mb-2">
-            Category:
-          </label>
-          <Select onValueChange={(value) => setCategory(value)}>
-            <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              Select Category
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Select">Select Category</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.name}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-  );
-};
+export { Dashboard };

@@ -31,8 +31,8 @@ import {
   Cell,
 } from "recharts";
 import { DownloadCloud, FileText, LayoutGrid, Loader2 } from "lucide-react";
-import { DashboardFilters } from "./Index";
 import Loader from "@/components/layout/Loader";
+import { Filters } from "@/components/dashboard/Filters";
 
 // Base API URL - update this with your actual API base URL
 const API_BASE_URL = "http://13.239.184.38:6500";
@@ -267,7 +267,7 @@ const Reports = () => {
 
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <DashboardFilters
+          {/* <Filters
             divisions={divisions}
             districts={districts}
             tehsils={tehsils}
@@ -279,7 +279,7 @@ const Reports = () => {
             setCraft={setCraft}
             setCategory={setCategory}
             setTehsil={setTehsil}
-          />
+          /> */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-1.5 block">
