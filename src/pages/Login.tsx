@@ -368,6 +368,14 @@ const Login: React.FC = () => {
                 <p className="text-sm text-gray-500">
                   Handcrafted with pride and passion
                 </p>
+                <p className="text-sm text-gray-400">
+                  <a
+                    href="https://www.processjunction.com"
+                    className=""
+                  >
+                    ProcessJunction Pvt. Ltd
+                  </a>
+                </p>
               </div>
             </div>
           </div>
