@@ -43,7 +43,7 @@ import {
 import { EyeIcon, PencilIcon, TrashIcon, MoreHorizontal, Filter, Download, PrinterIcon } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import ArtisanDetail from "./ArtisanDetail";
-const API_BASE_URL = 'http://13.239.184.38:6500';
+const API_BASE_URL = 'http://3.106.165.252:6500';
 
 const ArtisansList = () => {
   const [artisans, setArtisans] = useState([]);

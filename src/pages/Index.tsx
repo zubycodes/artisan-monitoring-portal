@@ -24,7 +24,7 @@ import Loader from "@/components/layout/Loader";
 import FiltersAll from "@/components/dashboard/FiltersAll";
 import { SelectOption } from "@/components/dashboard/Filters";
 
-const API_BASE_URL = "http://13.239.184.38:6500";
+const API_BASE_URL = "http://3.106.165.252:6500";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);

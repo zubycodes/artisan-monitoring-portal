@@ -14,7 +14,7 @@ interface MapPreviewProps {
 }
 
 // Constants
-const API_BASE_URL = 'http://13.239.184.38:6500';
+const API_BASE_URL = 'http://3.106.165.252:6500';
 const GEOJSON_URL = 'https://beige-cathe-75.tiiny.site/pakistan_districts.json';
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCDMOfZ6Xc-MV7pSImhOrf2q8MaYr28shM';
 const INITIAL_MAP_CENTER = { lat: 31.1704, lng: 72.7097 };

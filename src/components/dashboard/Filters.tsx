@@ -158,7 +158,7 @@ const Filters: React.FC<FiltersProps> = ({
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const API_BASE_URL = "http://13.239.184.38:6500";
+  const API_BASE_URL = "http://3.106.165.252:6500";
 
   // Fetch initial data on mount
   useEffect(() => {
