@@ -43,7 +43,7 @@ import {
 import { EyeIcon, PencilIcon, TrashIcon, MoreHorizontal, Filter, Download, PrinterIcon } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import ArtisanDetail from "./ArtisanDetail";
-const API_BASE_URL = 'http://3.106.165.252:6500';
+const API_BASE_URL = 'https://artisan-psic.com';
 
 const ArtisansList = () => {
   const [artisans, setArtisans] = useState([]);
@@ -257,7 +257,7 @@ const ArtisansList = () => {
                       </TableRow>
                     ) : (
                       currentArtisans.map((artisan, index) => (
-                        <TableRow key={artisan.id} className="hover:bg-gray-50 cursor-pointer">
+                        <TableRow key={artisan.id} className=" cursor-pointer">
                           <TableCell className="text-center">{(index + 1)}.</TableCell>
                           {visibleColumns.name && <TableCell className="font-medium">{artisan.name} {artisan.father_name}</TableCell>}
                           {visibleColumns.gender && <TableCell>{artisan.gender}</TableCell>}

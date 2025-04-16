@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { Check, ChevronDown, Filter, X } from "lucide-react";
+import { Card, CardContent } from "../ui/card";
 
 export interface SelectOption {
   code?: string;
@@ -33,70 +41,36 @@ const FilterSelect: React.FC<FilterSelectProps> = ({
 
   return (
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <div
-        className={`flex items-center justify-between px-4 py-2.5 rounded-lg border-2 cursor-pointer ${
-          value.name !== defaultValue
-            ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-            : "border-gray-200 hover:border-gray-300 text-gray-700"
-        }`}
-        onClick={() => setIsOpen(!isOpen)}
+      <label className="block text-xs font-medium mb-1">{label}</label>
+      <Select
+        onValueChange={(val) => {
+          const selectedOption = options.find(
+            (option) => (option.code || option.id || option.name) === val
+          );
+          if (selectedOption) {
+            onChange(selectedOption);
+          } else {
+            onChange({ name: defaultValue });
+          }
+        }}
       >
-        <div className="flex items-center gap-2">
-          {icon && <span className="text-gray-500">{icon}</span>}
-          <span className="truncate">
+        <SelectTrigger className="text-xs">
+          <SelectValue placeholder={placeholder}>
             {value.name !== defaultValue ? value.name : placeholder}
-          </span>
-        </div>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </div>
-
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="absolute z-50 mt-1 w-full rounded-md bg-white shadow-lg border border-gray-200 max-h-60 overflow-auto"
-        >
-          <div className="py-1">
-            <div
-              className="flex items-center px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
-              onClick={() => {
-                onChange({ name: defaultValue });
-                setIsOpen(false);
-              }}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent className="text-xs">
+          <SelectItem value={defaultValue}>{defaultValue}</SelectItem>
+          {options.map((option) => (
+            <SelectItem
+              key={option.code || option.id || option.name}
+              value={option.code || option.id?.toString() || option.name}
             >
-              <span className="flex-grow">{defaultValue}</span>
-              {value.name === defaultValue && (
-                <Check className="h-4 w-4 text-indigo-600" />
-              )}
-            </div>
-
-            {options.map((option) => (
-              <div
-                key={option.code || option.id || option.name}
-                className="flex items-center px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
-                onClick={() => {
-                  onChange(option);
-                  setIsOpen(false);
-                }}
-              >
-                <span className="flex-grow truncate">{option.name}</span>
-                {value.name === option.name && (
-                  <Check className="h-4 w-4 text-indigo-600" />
-                )}
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
+              {option.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
@@ -154,11 +128,11 @@ const Filters: React.FC<FiltersProps> = ({
   const [originalTechniques, setOriginalTechniques] = useState<SelectOption[]>(
     []
   );
-  const [filterExpanded, setFilterExpanded] = useState(false);
+  const [filterExpanded, setFilterExpanded] = useState(true);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const API_BASE_URL = "http://3.106.165.252:6500";
+  const API_BASE_URL = "https://artisan-psic.com";
 
   // Fetch initial data on mount
   useEffect(() => {
@@ -302,152 +276,160 @@ const Filters: React.FC<FiltersProps> = ({
   return (
     <div className="mb-8">
       {/* Collapsible Filter Header */}
-      <div className="mb-4">
-        <div
-          className={`flex items-center justify-between ${
-            activeFiltersCount > 0
-              ? "bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-pointer transition-all hover:shadow-md"
-              : ""
-          } `}
-          onClick={() => setFilterExpanded(!filterExpanded)}
-        >
-          <div className="flex items-center gap-3">
-            <div>
-              {activeFilters.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {activeFilters.map((filter) => (
-                    <div
-                      key={filter.key}
-                      className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-sm text-indigo-700"
-                    >
-                      <span className="font-medium">{filter.label}:</span>{" "}
-                      {filter.value}
-                      <button
-                        onClick={(e) => {
-                          updateSelected(filter.key as keyof typeof selected, {
-                            name: "Select",
-                          });
-                          e.stopPropagation();
-                        }}
-                        className="ml-1 p-0.5 rounded-full hover:bg-indigo-100"
-                      >
-                        <X className="h-3.5 w-3.5 text-indigo-500" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetAllFilters();
-                }}
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
-              >
-                Clear all
-              </button>
-            )}
-            <div className="bg-indigo-100 p-2 rounded-lg">
-              <Filter className="h-5 w-5 text-indigo-600" />
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Filter Form */}
       {filterExpanded && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-4"
-        >
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {!hide.division && (
-                  <FilterSelect
-                    label="Division"
-                    options={divisions}
-                    value={selected.division}
-                    onChange={(value) => updateSelected("division", value)}
-                    placeholder="Select Division"
-                  />
-                )}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className=""
+            >
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2">
+                    {!hide.division && (
+                      <FilterSelect
+                        label="Division"
+                        options={divisions}
+                        value={selected.division}
+                        onChange={(value) => updateSelected("division", value)}
+                        placeholder="Select Division"
+                      />
+                    )}
 
-                {!hide.district && (
-                  <FilterSelect
-                    label="District"
-                    options={districts}
-                    value={selected.district}
-                    onChange={(value) => updateSelected("district", value)}
-                    placeholder="Select District"
-                  />
-                )}
+                    {!hide.district && (
+                      <FilterSelect
+                        label="District"
+                        options={districts}
+                        value={selected.district}
+                        onChange={(value) => updateSelected("district", value)}
+                        placeholder="Select District"
+                      />
+                    )}
 
-                {!hide.tehsil && (
-                  <FilterSelect
-                    label="Tehsil"
-                    options={tehsils}
-                    value={selected.tehsil}
-                    onChange={(value) => updateSelected("tehsil", value)}
-                    placeholder="Select Tehsil"
-                  />
-                )}
+                    {!hide.tehsil && (
+                      <FilterSelect
+                        label="Tehsil"
+                        options={tehsils}
+                        value={selected.tehsil}
+                        onChange={(value) => updateSelected("tehsil", value)}
+                        placeholder="Select Tehsil"
+                      />
+                    )}
 
-                {!hide.gender && (
-                  <FilterSelect
-                    label="Gender"
-                    options={genderOptions}
-                    value={selected.gender}
-                    onChange={(value) => updateSelected("gender", value)}
-                    placeholder="Select Gender"
-                  />
-                )}
+                    {!hide.gender && (
+                      <FilterSelect
+                        label="Gender"
+                        options={genderOptions}
+                        value={selected.gender}
+                        onChange={(value) => updateSelected("gender", value)}
+                        placeholder="Select Gender"
+                      />
+                    )}
 
-                {!hide.craft && (
-                  <FilterSelect
-                    label="Craft"
-                    options={crafts}
-                    value={selected.craft}
-                    onChange={(value) => updateSelected("craft", value)}
-                    placeholder="Select Craft"
-                  />
-                )}
+                    {!hide.craft && (
+                      <FilterSelect
+                        label="Craft"
+                        options={crafts}
+                        value={selected.craft}
+                        onChange={(value) => updateSelected("craft", value)}
+                        placeholder="Select Craft"
+                      />
+                    )}
 
-                {!hide.category && (
-                  <FilterSelect
-                    label="Category"
-                    options={categories}
-                    value={selected.category}
-                    onChange={(value) => updateSelected("category", value)}
-                    placeholder="Select Category"
-                  />
-                )}
+                    {!hide.category && (
+                      <FilterSelect
+                        label="Category"
+                        options={categories}
+                        value={selected.category}
+                        onChange={(value) => updateSelected("category", value)}
+                        placeholder="Select Category"
+                      />
+                    )}
 
-                {!hide.techniques && (
-                  <FilterSelect
-                    label="Technique/Skills"
-                    options={techniques}
-                    value={selected.techniques}
-                    onChange={(value) => updateSelected("techniques", value)}
-                    placeholder="Select Technique/Skills"
-                  />
-                )}
+                    {!hide.techniques && (
+                      <FilterSelect
+                        label="Technique/Skills"
+                        options={techniques}
+                        value={selected.techniques}
+                        onChange={(value) =>
+                          updateSelected("techniques", value)
+                        }
+                        placeholder="Select Technique/Skills"
+                      />
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div
+                className={`flex items-center justify-between ${
+                  activeFiltersCount > 0
+                    ? "mt-6 cursor-pointer transition-all"
+                    : ""
+                } `}
+               /*  onClick={() => setFilterExpanded(!filterExpanded)} */
+              >
+                <div className="flex items-center gap-3">
+                  <div>
+                    {activeFilters.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {activeFilters.map((filter) => (
+                          <div
+                            key={filter.key}
+                            className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full border border-indigo-100 text-xs"
+                          >
+                            <span className="font-medium">{filter.label}:</span>{" "}
+                            {filter.value}
+                            <button
+                              onClick={(e) => {
+                                updateSelected(
+                                  filter.key as keyof typeof selected,
+                                  {
+                                    name: "Select",
+                                  }
+                                );
+                                e.stopPropagation();
+                              }}
+                              className="ml-1 p-0.5 rounded-full hover:bg-indigo-100"
+                            >
+                              <X className="h-3.5 w-3.5 hover:text-black" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {activeFiltersCount > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        resetAllFilters();
+                      }}
+                      className="text-sm mt-2 font-medium"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                  {/* <div className="bg-indigo-100 mt-2  p-2 rounded-lg">
+                    <Filter className="h-5 w-5 text-indigo-600" />
+                  </div> */}
+                </div>
               </div>
-            </>
-          )}
-        </motion.div>
+            </motion.div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

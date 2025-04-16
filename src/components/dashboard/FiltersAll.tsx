@@ -1,5 +1,6 @@
 // FiltersAll.tsx
 import React, { useState, useEffect } from "react";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Filters, FiltersProps } from "./Filters";
 
 export interface FiltersAllProps {

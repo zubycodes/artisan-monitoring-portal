@@ -35,7 +35,7 @@ import Loader from "@/components/layout/Loader";
 import { Filters } from "@/components/dashboard/Filters";
 
 // Base API URL - update this with your actual API base URL
-const API_BASE_URL = "http://3.106.165.252:6500";
+const API_BASE_URL = "https://artisan-psic.com";
 
 const Reports = () => {
   // State for various chart data

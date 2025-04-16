@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { TEInput, TERipple } from "tw-elements-react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/img/logo.png";
+
+import image1 from "../assets/img/pexels-mccutcheon-1153895.jpg";
+import image2 from "../assets/img/pexels-quang-nguyen-vinh-222549-2166456.jpg";
+import image3 from "../assets/img/pexels-hadyanphotograph-1328495.jpg";
+import image4 from "../assets/img/pexels-j-mt_photography-628996-3680094.jpg";
+import image5 from "../assets/img/pexels-digitalbuggu-191295.jpg";
+import image6 from "../assets/img/pexels-orlovamaria-4915832.jpg";
+import image7 from "../assets/img/pexels-solodsha-8105116.jpg";
+import image8 from "../assets/img/pexels-digitalbuggu-352899.jpg";
+import image9 from "../assets/img/pexels-jadson-thomas-164235-542556.jpg";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -13,15 +24,15 @@ const Login: React.FC = () => {
 
   // Artisan craft images
   const artisanImages = [
-    "https://processjunction.com/wp-content/artisan/pexels-mccutcheon-1153895.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-quang-nguyen-vinh-222549-2166456.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-hadyanphotograph-1328495.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-j-mt_photography-628996-3680094.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-digitalbuggu-191295.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-orlovamaria-4915832.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-solodsha-8105116.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-digitalbuggu-352899.jpg",
-    "https://processjunction.com/wp-content/artisan/pexels-jadson-thomas-164235-542556.jpg",
+    image1,
+    image2,
+    image3,
+    image4,
+    image5,
+    image6,
+    image7,
+    image8,
+    image9,
   ];
 
   // Crafting-related quotes
@@ -73,7 +84,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://3.106.165.252:6500/user/login", {
+      const response = await fetch("https://artisan-psic.com/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -198,7 +209,7 @@ const Login: React.FC = () => {
           <div className="flex justify-center mb-8">
             <div className="relative w-full max-w-[200px]">
               <img
-                src="https://artisan.psic-erp.com/Content/images/bg/Logo.jpeg"
+                src={logo}
                 alt="Artisan Logo"
                 className="w-full h-auto object-contain"
               />
@@ -369,10 +380,7 @@ const Login: React.FC = () => {
                   Handcrafted with pride and passion
                 </p>
                 <p className="text-sm text-gray-400">
-                  <a
-                    href="https://www.processjunction.com"
-                    className=""
-                  >
+                  <a href="https://www.processjunction.com" className="">
                     ProcessJunction Pvt. Ltd
                   </a>
                 </p>

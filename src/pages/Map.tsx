@@ -17,10 +17,11 @@ import {
 import ArtisanDetail from "./ArtisanDetail";
 import FiltersAll from "@/components/dashboard/FiltersAll";
 import { SelectOption } from "@/components/dashboard/Filters";
+import DistrictGeoJson from "../assets/map/districts.json";
 
 // Constants
-const API_BASE_URL = "http://3.106.165.252:6500";
-const GEOJSON_URL = "https://beige-cathe-75.tiiny.site/pakistan_districts.json";
+const API_BASE_URL = "https://artisan-psic.com";
+const GEOJSON_URL = DistrictGeoJson;
 const GOOGLE_MAPS_API_KEY = "AIzaSyCDMOfZ6Xc-MV7pSImhOrf2q8MaYr28shM";
 const INITIAL_MAP_CENTER = { lat: 31.1704, lng: 72.7097 };
 const INITIAL_MAP_ZOOM = 7;
@@ -45,7 +46,7 @@ const Marker = ({ lat, lng, artisan, $hover = false, onClick }) => {
       */}
       {/* <MapPin onClick={(event) => { event.stopPropagation(); onClick(artisan); }} size={20} style={{ color: artisan.craft_color }} /> */}
       <img
-        src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+        src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
         width="20"
         height="10"
         className={`cursor-pointer transition-transform ${
@@ -796,9 +797,46 @@ const Map = () => {
       console.log("Google Maps API loaded");
       setMapInstance(map);
       setMapsApi(maps);
+      map.data.addGeoJson(DistrictGeoJson);
 
+      // Style the GeoJSON features
+      map.data.setStyle({
+        fillColor: "green",
+        strokeColor: "black",
+        fillOpacity: 0.2,
+        strokeWeight: 0.5,
+      });
+
+      // Add click listener for interactivity
+      map.data.addListener("click", (event) => {
+        const feature = event.feature;
+        const district = feature.getProperty("districts");
+        console.log("District clicked:", district);
+
+        setSelectedArtisan(null);
+        animateToDistrict(district);
+      });
+      map.data.addGeoJson(DistrictGeoJson);
+
+      // Style the GeoJSON features
+      map.data.setStyle({
+        fillColor: "green",
+        strokeColor: "black",
+        fillOpacity: 0.2,
+        strokeWeight: 0.5,
+      });
+
+      // Add click listener for interactivity
+      map.data.addListener("click", (event) => {
+        const feature = event.feature;
+        const district = feature.getProperty("districts");
+        console.log("District clicked:", district);
+
+        setSelectedArtisan(null);
+        animateToDistrict(district);
+      });
       // Fetch and load GeoJSON
-      fetch(GEOJSON_URL)
+      /* fetch(GEOJSON_URL)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Failed to load GeoJSON");
@@ -806,31 +844,13 @@ const Map = () => {
           return response.json();
         })
         .then((geoJsonData) => {
-          map.data.addGeoJson(geoJsonData);
-
-          // Style the GeoJSON features
-          map.data.setStyle({
-            fillColor: "green",
-            strokeColor: "black",
-            fillOpacity: 0.2,
-            strokeWeight: 0.5,
-          });
-
-          // Add click listener for interactivity
-          map.data.addListener("click", (event) => {
-            const feature = event.feature;
-            const district = feature.getProperty("districts");
-            console.log("District clicked:", district);
-
-            setSelectedArtisan(null);
-            animateToDistrict(district);
-          });
+          
         })
         .catch((error) => {
           console.error("Error loading GeoJSON:", error);
           setError("Failed to load map data.");
           setLoading(false);
-        });
+        }); */
     },
     [animateToDistrict]
   );
@@ -926,7 +946,6 @@ const Map = () => {
             artisans={mapData.artisans}
             selectedArtisan={selectedArtisan}
             mapProps={mapProps}
-            styles={mapStyles}
             onMarkerClick={handleMarkerClick}
             onApiLoaded={handleApiLoaded}
             onMapChange={handleMapChange}
