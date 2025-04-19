@@ -24,7 +24,7 @@ import Loader from "@/components/layout/Loader";
 import FiltersAll from "@/components/dashboard/FiltersAll";
 import { SelectOption } from "@/components/dashboard/Filters";
 
-const API_BASE_URL = "https://artisan-psic.com";
+const API_BASE_URL = "http://localhost:6500";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);

@@ -138,12 +138,12 @@ const Navbar = () => {
               <span>Map</span>
             </Button>
             <Button
-              variant={isActive("/artisans") ? "secondary" : "ghost"}
+              variant={isActive("/artisans-directory") ? "secondary" : "ghost"}
               className={`gap-2 ${
-                !isActive("/artisans") &&
+                !isActive("/artisans-directory") &&
                 "hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20"
               }`}
-              onClick={() => navigate("/artisans")}
+              onClick={() => navigate("/artisans-directory")}
             >
               <Users className="h-4 w-4" />
               <span>Artisans</span>

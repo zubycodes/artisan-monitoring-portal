@@ -132,7 +132,7 @@ const Filters: React.FC<FiltersProps> = ({
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const API_BASE_URL = "https://artisan-psic.com";
+  const API_BASE_URL = "http://localhost:6500";
 
   // Fetch initial data on mount
   useEffect(() => {
@@ -376,7 +376,7 @@ const Filters: React.FC<FiltersProps> = ({
                     ? "mt-6 cursor-pointer transition-all"
                     : ""
                 } `}
-               /*  onClick={() => setFilterExpanded(!filterExpanded)} */
+                /*  onClick={() => setFilterExpanded(!filterExpanded)} */
               >
                 <div className="flex items-center gap-3">
                   <div>

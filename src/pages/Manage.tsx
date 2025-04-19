@@ -67,7 +67,7 @@ import {
 } from "@/components/ui/dialog";
 import { DialogClose, DialogTrigger } from "@radix-ui/react-dialog";
 
-const API_BASE_URL = "https://artisan-psic.com";
+const API_BASE_URL = "http://localhost:6500";
 
 const Manage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -1137,8 +1137,8 @@ const Manage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Category</TableHead>
                               <TableHead>Craft</TableHead>
+                              <TableHead>Category</TableHead>
                               <TableHead>Number of Techniques/Skills</TableHead>
                               <TableHead>Number of Artisans</TableHead>
                               <TableHead className="w-12"></TableHead>
@@ -1150,6 +1150,17 @@ const Manage = () => {
                                 key={category.id}
                                 className="cursor-pointer"
                               >
+                                <TableCell>
+                                  <Badge
+                                    className="py-1 px-4"
+                                    style={{
+                                      backgroundColor: category.craft_color,
+                                      color: "black",
+                                    }}
+                                  >
+                                    {category.craft_name}
+                                  </Badge>
+                                </TableCell>
                                 <TableCell className="group">
                                   <Badge
                                     className="py-1 px-4"
@@ -1172,17 +1183,6 @@ const Manage = () => {
                                         <PencilIcon className="h-4 w-4 hover:text-black/50" />
                                       </button>
                                     </div>
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    className="py-1 px-4"
-                                    style={{
-                                      backgroundColor: category.craft_color,
-                                      color: "black",
-                                    }}
-                                  >
-                                    {category.craft_name}
                                   </Badge>
                                 </TableCell>
                                 <TableCell>
@@ -1249,9 +1249,9 @@ const Manage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Technique/Skills</TableHead>
-                              <TableHead>Category</TableHead>
                               <TableHead>Craft</TableHead>
+                              <TableHead>Category</TableHead>
+                              <TableHead>Technique/Skills</TableHead>
                               <TableHead>Number of Artisans</TableHead>
                               <TableHead className="w-12"></TableHead>
                             </TableRow>
@@ -1262,6 +1262,29 @@ const Manage = () => {
                                 key={skill.id}
                                 className="cursor-pointer"
                               >
+                                <TableCell>
+                                  <Badge
+                                    className="py-1 px-4"
+                                    style={{
+                                      backgroundColor: skill.craft_color,
+                                      color: "black",
+                                    }}
+                                  >
+                                    {skill.craft_name}
+                                  </Badge>
+                                </TableCell>
+
+                                <TableCell>
+                                  <Badge
+                                    className="py-1 px-4"
+                                    style={{
+                                      backgroundColor: skill.category_color,
+                                      color: "black",
+                                    }}
+                                  >
+                                    {skill.category_name}
+                                  </Badge>
+                                </TableCell>
                                 <TableCell className="group">
                                   <Badge
                                     className="py-1 px-4"
@@ -1284,28 +1307,6 @@ const Manage = () => {
                                         <PencilIcon className="h-4 w-4 hover:text-black/50" />
                                       </button>
                                     </div>
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    className="py-1 px-4"
-                                    style={{
-                                      backgroundColor: skill.category_color,
-                                      color: "black",
-                                    }}
-                                  >
-                                    {skill.category_name}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    className="py-1 px-4"
-                                    style={{
-                                      backgroundColor: skill.craft_color,
-                                      color: "black",
-                                    }}
-                                  >
-                                    {skill.craft_name}
                                   </Badge>
                                 </TableCell>
                                 <TableCell className="text-md">
