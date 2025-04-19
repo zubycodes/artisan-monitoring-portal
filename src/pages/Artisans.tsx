@@ -52,14 +52,20 @@ import {
 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import ArtisanDetail from "./ArtisanDetail";
-const API_BASE_URL = "http://localhost:6500";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+const API_BASE_URL = "https://artisan-psic.com";
 
 const ArtisansList = () => {
   const [artisans, setArtisans] = useState([]);
   const [filteredArtisans, setFilteredArtisans] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
   const [loading, setLoading] = useState(true);
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
@@ -303,7 +309,7 @@ const ArtisansList = () => {
                         <TableHead> Financial Assistance Required</TableHead>
                       )}
                       {visibleColumns.technical_assistance && (
-                        <TableHead> Technial Assistance Required</TableHead>
+                        <TableHead> Technical Assistance Required</TableHead>
                       )}
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -396,71 +402,137 @@ const ArtisansList = () => {
                             </TableCell>
                           )}
                           <TableCell className="text-right">
-                            <Button
-                              className="m-1"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                window.open(
-                                  `/artisans-directory/${artisan.id}/p`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              <PrinterIcon />
-                            </Button>
+                            {/* TooltipProvider is needed once around the area using tooltips */}
+                            {/* You might have it higher up in your component tree already */}
+                            <TooltipProvider delayDuration={200}>
+                              {/* Wrapper div for consistent spacing */}
+                              <div className="flex items-center justify-end gap-x-1">
+                                {" "}
+                                {/* Use gap for spacing */}
+                                {/* --- Print Button --- */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost" // Keep outline for print as it's less common? Or use ghost.
+                                      size="sm" // Consistent size
+                                      className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-100 border-green-300 dark:border-green-600 hover:bg-green-100 dark:hover:bg-green-700" // Neutral subtle styling
+                                      onClick={() => {
+                                        window.open(
+                                          `/artisans-directory/${artisan.id}/p`,
+                                          "_blank"
+                                        );
+                                      }}
+                                    >
+                                      <PrinterIcon className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        Print Artisan Details
+                                      </span>{" "}
+                                      {/* Screen reader text */}
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Print</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                                {/* --- View Button --- */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost" // Ghost is common for subtle icon actions
+                                      size="sm" // Consistent size
+                                      className="text-white-600 hover:text-white-800 dark:text-white-400 dark:hover:text-white-300 hover:bg-white-100 dark:hover:bg-white-900/30" // white tint for 'view'
+                                      onClick={() => {
+                                        setArtisanId(artisan.id);
+                                        setIsDialogOpen(true); // Open the dialog
+                                      }}
+                                    >
+                                      <EyeIcon className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        View Artisan Details
+                                      </span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>View Details</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                                {/* --- Edit Button --- */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost" // Consistent ghost variant
+                                      size="sm" // Consistent size
+                                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30" // Blue/Amber tint for 'edit'
+                                      onClick={() => {
+                                        // Consider using react-router navigation instead of window.open for SPA consistency
+                                        window.open(
+                                          `/artisans-directory/${artisan.id}/edit`,
+                                          "_blank"
+                                        );
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        Edit Artisan
+                                      </span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Edit</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                                {/* --- Delete Button --- */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost" // Keep destructive for delete
+                                      size="sm" // Consistent size
+                                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30" // Destructive colors (often handled by variant, but explicit hover helps)
+                                      onClick={() => {
+                                        setArtisanId(artisan.id); // Set ID for context
+                                        handleDelete(); // Call the delete handler
+                                      }}
+                                    >
+                                      <TrashIcon className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        Delete Artisan
+                                      </span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="bg-destructive text-destructive-foreground">
+                                    <p>Delete</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            </TooltipProvider>
 
-                            <Button
-                              className="m-1"
-                              variant="link"
-                              size="sm"
-                              onClick={() => {
-                                setArtisanId(artisan.id);
-                                setIsDialogOpen(true);
-                              }}
-                            >
-                              <EyeIcon className="h-4 w-4" />
-                            </Button>
-
-                            <Button
-                              className="m-1"
-                              variant="link"
-                              size="sm"
-                              onClick={() => {
-                                window.open(
-                                  `/artisans-directory/${artisan.id}/edit`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-
-                            <Button
-                              className="mr-2"
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => {
-                                setArtisanId(artisan.id);
-                                handleDelete();
-                              }}
-                            >
-                              <TrashIcon />
-                            </Button>
+                            {/* --- Dialog for View --- */}
+                            {/* The Dialog component itself remains unchanged logically */}
                             <Dialog
-                              open={artisanId === artisan.id && isDialogOpen}
-                              onOpenChange={() => {
-                                setIsDialogOpen(!isDialogOpen);
+                              open={artisanId === artisan.id && isDialogOpen} // Only open if this row's ID matches and dialog is toggled
+                              onOpenChange={(open) => {
+                                setIsDialogOpen(open); // Allow closing via overlay click etc.
+                                if (!open) {
+                                  // Optional: Reset artisanId when dialog closes
+                                  // setArtisanId(null);
+                                }
                               }}
                             >
-                              <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh] flex flex-col">
+                              <DialogContent className="sm:max-w-[90vw] md:max-w-[70vw] lg:max-w-[60vw] xl:max-w-[50vw] sm:max-h-[90vh] flex flex-col">
                                 <DialogHeader>
                                   <DialogTitle>
-                                    {artisan.name} {artisan.father_name}
+                                    Artisan Details: {artisan.name}{" "}
+                                    {artisan.father_name}
                                   </DialogTitle>
                                 </DialogHeader>
-                                <div className="flex-grow overflow-y-auto">
-                                  <ArtisanDetail artisan_id={artisanId} />
+                                {/* Ensure the content area scrolls if needed */}
+                                <div className="flex-grow overflow-y-auto pr-2">
+                                  {" "}
+                                  {/* Add padding-right if scrollbar overlaps */}
+                                  {/* Conditionally render Detail only when ID matches to potentially refetch data */}
+                                  {artisanId === artisan.id && (
+                                    <ArtisanDetail artisan_id={artisanId} />
+                                  )}
                                 </div>
                               </DialogContent>
                             </Dialog>

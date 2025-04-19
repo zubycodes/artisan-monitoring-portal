@@ -132,7 +132,7 @@ const Filters: React.FC<FiltersProps> = ({
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const API_BASE_URL = "http://localhost:6500";
+  const API_BASE_URL = "https://artisan-psic.com";
 
   // Fetch initial data on mount
   useEffect(() => {

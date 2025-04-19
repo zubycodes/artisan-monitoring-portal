@@ -3,7 +3,7 @@ import { PrinterIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "http://localhost:6500";
+const API_BASE_URL = "https://artisan-psic.com";
 
 const ArtisanDetail = ({ artisan_id }) => {
   const { id, p } = useParams();

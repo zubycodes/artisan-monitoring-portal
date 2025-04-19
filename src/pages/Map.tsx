@@ -20,7 +20,7 @@ import { SelectOption } from "@/components/dashboard/Filters";
 import DistrictGeoJson from "../assets/map/districts.json";
 
 // Constants
-const API_BASE_URL = "http://localhost:6500";
+const API_BASE_URL = "https://artisan-psic.com";
 const GEOJSON_URL = DistrictGeoJson;
 const GOOGLE_MAPS_API_KEY = "AIzaSyCDMOfZ6Xc-MV7pSImhOrf2q8MaYr28shM";
 const INITIAL_MAP_CENTER = { lat: 31.1704, lng: 72.7097 };
@@ -244,7 +244,7 @@ const InfoWindow = ({ lat, lng, artisanId, onClose }) => {
                 variant="outline"
                 className="small"
                 onClick={() =>
-                  window.open(`/artisans/${artisanData.id}`, "_blank")
+                  window.open(`/artisans-directory/${artisanData.id}`, "_blank")
                 }
               >
                 <EyeIcon className="h-4 w-4 mr-2" />

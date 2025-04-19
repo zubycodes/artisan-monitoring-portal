@@ -67,7 +67,7 @@ import {
 } from "@/components/ui/dialog";
 import { DialogClose, DialogTrigger } from "@radix-ui/react-dialog";
 
-const API_BASE_URL = "http://localhost:6500";
+const API_BASE_URL = "https://artisan-psic.com";
 
 const Manage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
