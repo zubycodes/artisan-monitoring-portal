@@ -606,6 +606,7 @@ const FilterSection = ({ data, onChange }) => {
 const GoogleMap = ({
   artisans,
   styles,
+  
   selectedArtisan,
   mapProps,
   onMarkerClick,
@@ -624,6 +625,7 @@ const GoogleMap = ({
           zoomControl: true,
           clickableIcons: false,
           styles,
+          mapTypeId: "satellite",
         }}
         hoverDistance={30}
       >
@@ -641,7 +643,7 @@ const GoogleMap = ({
             lat={selectedArtisan.latitude}
             lng={selectedArtisan.longitude}
             artisanId={selectedArtisan.id}
-            onClose={() => onMarkerClick(null)}
+            onClose={() => onMarkerClick(null, true)}
           />
         )}
       </GoogleMapReact>
@@ -666,6 +668,7 @@ const Map = () => {
     users: [],
   });
   const [selectedArtisan, setSelectedArtisan] = useState(null);
+  const [mapInteraction, setMapInteraction] = useState(false);
   const [mapInstance, setMapInstance] = useState(null);
   const [mapsApi, setMapsApi] = useState(null);
   const [mapProps, setMapProps] = useState({
@@ -718,11 +721,17 @@ const Map = () => {
 
   // Handle marker click
   const handleMarkerClick = useCallback(
-    (artisan) => {
+    (artisan, closeWindow = false) => {
       console.log("Marker clicked", artisan);
       // Toggle off if same artisan is clicked again
+      if (closeWindow) {
+        setSelectedArtisan(null);
+        setMapInteraction(true);
+        return;
+      }
       if (!artisan) {
         setSelectedArtisan(null);
+
         setMapProps({
           center: INITIAL_MAP_CENTER,
           zoom: INITIAL_MAP_ZOOM,
@@ -735,7 +744,7 @@ const Map = () => {
       }
       // Set selected artisan and update map center
       setSelectedArtisan(artisan);
-      if (mapInstance && artisan) {
+      if (mapInstance && artisan && !mapInteraction) {
         setMapProps({
           center: {
             lat: parseFloat(artisan.latitude),
@@ -797,14 +806,14 @@ const Map = () => {
       console.log("Google Maps API loaded");
       setMapInstance(map);
       setMapsApi(maps);
-      map.data.addGeoJson(DistrictGeoJson);
+      //map.data.addGeoJson(DistrictGeoJson);
 
       // Style the GeoJSON features
       map.data.setStyle({
         fillColor: "green",
-        strokeColor: "black",
-        fillOpacity: 0.2,
-        strokeWeight: 0.5,
+        fillOpacity: 0,
+        strokeColor: "green",
+        strokeWeight: 1,
       });
 
       // Add click listener for interactivity
@@ -814,27 +823,11 @@ const Map = () => {
         console.log("District clicked:", district);
 
         setSelectedArtisan(null);
+        setMapInteraction(false);
+
         animateToDistrict(district);
       });
-      map.data.addGeoJson(DistrictGeoJson);
 
-      // Style the GeoJSON features
-      map.data.setStyle({
-        fillColor: "green",
-        strokeColor: "black",
-        fillOpacity: 0.2,
-        strokeWeight: 0.5,
-      });
-
-      // Add click listener for interactivity
-      map.data.addListener("click", (event) => {
-        const feature = event.feature;
-        const district = feature.getProperty("districts");
-        console.log("District clicked:", district);
-
-        setSelectedArtisan(null);
-        animateToDistrict(district);
-      });
       // Fetch and load GeoJSON
       /* fetch(GEOJSON_URL)
         .then((response) => {
@@ -897,39 +890,30 @@ const Map = () => {
     [animateToDistrict]
   );
   const mapStyles = [
+    // --- Emphasize Water with Vibrant Blue ---
     {
-      featureType: "administrative.land_parcel",
-      elementType: "labels",
+      // Ensure the base administrative labels are visible
+      featureType: "administrative",
+      elementType: "labels", // Target the general labels element
       stylers: [
-        {
-          visibility: "off",
-        },
+        { visibility: "on" }, // Explicitly turn ON
       ],
     },
     {
-      featureType: "poi",
-      elementType: "labels.text",
+      // Style the text fill for contrast
+      featureType: "administrative",
+      elementType: "labels.text.fill",
       stylers: [
-        {
-          visibility: "off",
-        },
+        { color: "#ffffff" }, // White text
       ],
     },
     {
-      featureType: "road",
+      // Style the text stroke for contrast
+      featureType: "administrative",
+      elementType: "labels.text.stroke",
       stylers: [
-        {
-          visibility: "off",
-        },
-      ],
-    },
-    {
-      featureType: "road.local",
-      elementType: "labels",
-      stylers: [
-        {
-          visibility: "off",
-        },
+        { color: "#222222" }, // Dark stroke
+        { weight: 1.5 },
       ],
     },
   ];
@@ -946,7 +930,7 @@ const Map = () => {
             artisans={mapData.artisans}
             selectedArtisan={selectedArtisan}
             mapProps={mapProps}
-            styles={{}}
+            styles={mapStyles}
             onMarkerClick={handleMarkerClick}
             onApiLoaded={handleApiLoaded}
             onMapChange={handleMapChange}
