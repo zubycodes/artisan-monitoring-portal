@@ -12,13 +12,13 @@ import {
 import { Dashboard as Index } from "./pages/Index";
 import Manage from "./pages/Manage";
 import Map from "./pages/Map";
-import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import "tw-elements-react/dist/css/tw-elements-react.min.css";
 import Artisans from "./pages/Artisans";
 import ArtisanDetail from "./pages/ArtisanDetail";
 import ArtisanEdit from "./pages/ArtisanEdit";
+import { Reports } from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +30,12 @@ const ArtisanDetailWrapper = () => {
 const ProtectedRoute = ({ children }) => {
   // return true;
   const user = localStorage.getItem("ussr");
-  return user ? children : <Navigate to="/login" />;
+  console.log("ProtectedRoute", JSON.parse(user));
+  const parsedUser = JSON.parse(user);
+  if (parsedUser.username === "admin") {
+    return children;
+  }
+  return <Navigate to="/login" />;
 };
 
 const App = () => (

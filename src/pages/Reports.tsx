@@ -29,43 +29,78 @@ import {
   PieChart,
   Pie,
   Cell,
+  LabelList,
+  Label,
 } from "recharts";
 import { DownloadCloud, FileText, LayoutGrid, Loader2 } from "lucide-react";
 import Loader from "@/components/layout/Loader";
-import { Filters } from "@/components/dashboard/Filters";
+import { SelectOption } from "@/components/dashboard/Filters";
+import FiltersAll from "@/components/dashboard/FiltersAll";
+// Assume Filters component handles its own state and calls onChange prop
+// with selected filter values
 
 // Base API URL - update this with your actual API base URL
 const API_BASE_URL = "https://artisan-psic.com";
 
-const Reports = () => {
+const ReportsSection = () => {
   // State for various chart data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedReportType, setSelectedReportType] = useState("demographic");
-  const [selectedTimePeriod, setSelectedTimePeriod] = useState("6months");
-  const [selectedRegion, setSelectedRegion] = useState("all");
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState("6months"); // This filter isn't currently used in API calls
+  const [selectedRegion, setSelectedRegion] = useState("all"); // This filter isn't currently used in API calls
 
-  // States for different data tables
-  const [artisans, setArtisans] = useState([]);
-  const [crafts, setCrafts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [techniqueSkills, setTechniqueSkills] = useState([]);
-  const [education, setEducation] = useState([]);
-  const [users, setUsers] = useState([]);
-
-  const [divisions, setDivisions] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [tehsils, setTehsils] = useState([]);
-  const [categoriesData, setCategoriesData] = useState([]);
-
+  // --- Filter States (KEEP THESE) ---
   const [division, setDivision] = useState("");
   const [district, setDistrict] = useState("");
   const [gender, setGender] = useState("");
   const [craft, setCraft] = useState("");
   const [category, setCategory] = useState("");
   const [tehsil, setTehsil] = useState("");
+  const [techniquesSkills, setTechniquesSkills] = useState(""); // Assuming skill filter state name
+  const [education, setEducation] = useState(""); // Assuming education filter state name
+  const [rawMaterialFilter, setRawMaterialFilter] = useState("");
+  const [employmentTypeFilter, setEmploymentTypeFilter] = useState("");
+  const [craftingMethodFilter, setCraftingMethodFilter] = useState("");
+  const [avgMonthlyIncomeFilter, setAvgMonthlyIncomeFilter] = useState("");
+  const [dependentsCountFilter, setDependentsCountFilter] = useState("");
+  const [inheritedSkillsFilter, setInheritedSkillsFilter] = useState("");
+  const [hasMachineryFilter, setHasMachineryFilter] = useState("");
+  const [hasTrainingFilter, setHasTrainingFilter] = useState("");
+  const [loanStatusFilter, setLoanStatusFilter] = useState("");
+  const [financialAssistanceFilter, setFinancialAssistanceFilter] = useState("");
+  const [technicalAssistanceFilter, setTechnicalAssistanceFilter] = useState("");
+  // --- End Filter States ---
 
-  // States for derived chart data
+
+  const colors = [
+    "#3b82f6", // Blue
+    "#8b5cf6", // Purple
+    "#10b981", // Green
+    "#f59e0b", // Orange
+    "#ef4444", // Red
+    "#fcd34d", // Yellow
+    "#06b6d4", // Cyan
+    "#ec4899", // Magenta
+    "#84cc16", // Lime Green
+    "#fb7185", // Coral
+    "#008080", // Teal
+    "#FF4500", // Orange Red
+    "#2E8B57", // Sea Green
+    "#DAA520", // Goldenrod
+    "#483D8B", // Dark Slate Blue
+    "#40E0D0", // Turquoise
+    "#FF6347", // Tomato
+    "#B22222", // Firebrick
+    "#00CED1", // Dark Turquoise
+    "#FF8C00", // Dark Orange
+    "#ADFF2F", // Green Yellow
+    "#FF69B4", // Hot Pink
+    "#7FFF00", // Chartreuse
+    "#DC143C", // Crimson
+    "#00BFFF", // Deep Sky Blue
+  ];
+  // States for derived chart data (KEEP THESE)
   const [genderData, setGenderData] = useState([]);
   const [educationData, setEducationData] = useState([]);
   const [skillData, setSkillData] = useState([]);
@@ -82,128 +117,193 @@ const Reports = () => {
   const [cumulativeRegistrationsData, setCumulativeRegistrationsData] =
     useState([]);
   const [experienceVsIncomeData, setExperienceVsIncomeData] = useState([]);
+  const [geographicalDistributionData, setGeographicalDistributionData] = useState([]); // Added state for geographical data
 
-  // COLORS for pie charts and other visualizations
+  const experienceDataSorted = () => {
+    function getStartNumber(name) {
+      const parts = name.split(/[-+]/);
+      return parseInt(parts[0], 10);
+    }
+    return [...experienceData].sort((a, b) => getStartNumber(a.name) - getStartNumber(b.name));
+  }
+  const sortedExperienceData = experienceDataSorted();
+  // COLORS for pie charts and other visualizations (KEEP THESE)
   const COLORS = [
-    "#0088FE",
-    "#00C49F",
-    "#FFBB28",
-    "#FF8042",
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#8dd1e1",
+    "#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d", "#ffc658", "#8dd1e1",
   ];
 
-  // Fetch raw data from all tables
+  // Mapping filter keys to state setters
+  // NOTE: Ensure these keys match the names used in the FiltersAll component's onChange output
+  const filterStateSetters = {
+    division: setDivision,
+    district: setDistrict,
+    tehsil: setTehsil,
+    gender: setGender,
+    craft: setCraft,
+    category: setCategory,
+    technique: setTechniquesSkills, // Assuming 'technique' is the key from FiltersAll
+    education: setEducation,
+    raw_material: setRawMaterialFilter,
+    employment_type_id: setEmploymentTypeFilter, // Assuming 'employment_type_id' is the key from FiltersAll
+    crafting_method: setCraftingMethodFilter,
+    avg_monthly_income: setAvgMonthlyIncomeFilter,
+    dependents_count: setDependentsCountFilter,
+    inherited_skills: setInheritedSkillsFilter,
+    has_machinery: setHasMachineryFilter,
+    has_training: setHasTrainingFilter,
+    loan_status: setLoanStatusFilter,
+    financial_assistance: setFinancialAssistanceFilter,
+    technical_assistance: setTechnicalAssistanceFilter,
+    // Add other filter keys from FiltersAll here
+  };
+
+  // Generic function to process filter value (copy from Dashboard component)
+  const processFilterValue = (value: SelectOption | SelectOption[] | null | undefined): string => {
+    if (!value) {
+      return ""; // Handle null or undefined
+    }
+    if (Array.isArray(value)) {
+      const names = value
+        .map(item => item?.name)
+        .filter(name => typeof name === 'string' && name !== '');
+      return names.join(','); // Join valid names with a comma
+    } else {
+      if (typeof value === 'object' && value !== null && value.name && value.name !== 'Select') {
+        return value.name;
+      }
+      return ""; // Return empty string for "Select" or invalid single values
+    }
+  };
+
+
+  // Handler for filter changes from FiltersAll component
+  const handleFilterChange = (selected: { [key: string]: SelectOption | SelectOption[] | null | undefined | string }) => {
+    Object.keys(filterStateSetters).forEach(key => {
+      // Ensure the key exists in the incoming selected object before processing
+      if (selected.hasOwnProperty(key)) {
+        const setter = filterStateSetters[key as keyof typeof filterStateSetters];
+        const selectedValue = selected[key];
+        const processedValue = processFilterValue(selectedValue as SelectOption | SelectOption[]);
+        setter(processedValue);
+      }
+    });
+  };
+
+
+  // Effect to fetch data whenever filter states change
   useEffect(() => {
-    const fetchRawData = async () => {
-      setLoading(true);
+    const fetchFilteredReportsData = async () => {
+      /* setLoading(true); */
+      setError(null);
+
+      // --- Construct Query Parameters ---
+      const queryParams = new URLSearchParams();
+      if (division) queryParams.append('division', division);
+      if (district) queryParams.append('district', district);
+      if (gender) queryParams.append('gender', gender);
+      if (craft) queryParams.append('craft', craft);
+      if (category) queryParams.append('category', category);
+      if (tehsil) queryParams.append('tehsil', tehsil);
+      // Assuming 'skill' is the query parameter name expected by backend for techniques/skills
+      if (techniquesSkills) queryParams.append('skill', techniquesSkills);
+      // Add new filters to query params (ensure names match backend expectation)
+      if (education) queryParams.append('education', education);
+      if (rawMaterialFilter) queryParams.append('raw_material', rawMaterialFilter);
+      // Assuming 'employment_type' is the query parameter name expected by backend
+      if (employmentTypeFilter) queryParams.append('employment_type', employmentTypeFilter);
+      if (craftingMethodFilter) queryParams.append('crafting_method', craftingMethodFilter);
+      if (avgMonthlyIncomeFilter) queryParams.append('avg_monthly_income', avgMonthlyIncomeFilter);
+      if (dependentsCountFilter) queryParams.append('dependents_count', dependentsCountFilter);
+      if (inheritedSkillsFilter) queryParams.append('inherited_skills', inheritedSkillsFilter);
+      if (hasMachineryFilter) queryParams.append('has_machinery', hasMachineryFilter);
+      if (hasTrainingFilter) queryParams.append('has_training', hasTrainingFilter);
+      if (loanStatusFilter) queryParams.append('loan_status', loanStatusFilter);
+      if (financialAssistanceFilter) queryParams.append('financial_assistance', financialAssistanceFilter);
+      if (technicalAssistanceFilter) queryParams.append('technical_assistance', technicalAssistanceFilter);
+
+      // Note: selectedTimePeriod and selectedRegion are not used in API call yet
+      // If backend needs these, add them here.
+
+      const queryString = queryParams.toString();
+      const url = `${API_BASE_URL}/charts/all?${queryString}`; // Append query string
+
       try {
-        const response = await fetch(`${API_BASE_URL}/charts/all`);
+        console.log("Fetching reports data with URL:", url); // Log the fetch URL
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        console.log(data);
-        if (data.genderDistribution) {
-          setGenderData(data.genderDistribution);
-        }
-        if (data.educationDistribution) {
-          setEducationData(data.educationDistribution);
-        }
-        if (data.ageDistribution) {
-          setAgeData(data.ageDistribution);
-        }
-        if (data.tehsilDistribution) {
-          setTehsilData(data.tehsilDistribution);
-        }
-        if (data.incomeDistribution) {
-          setIncomeData(data.incomeDistribution);
-        }
-        if (data.genderByTehsil) {
-          setGenderByTehsilData(data.genderByTehsil);
-        }
-        if (data.dependentsDistribution) {
-          setDependentsData(data.dependentsDistribution);
-        }
-        if (data.skillDistribution) {
-          setSkillData(data.skillDistribution);
-        }
-        if (data.averageIncomeBySkill) {
-          setIncomeBySkillData(data.averageIncomeBySkill);
-        }
-        if (data.experienceVsIncome) {
-          setExperienceVsIncomeData(data.experienceVsIncome);
-        }
-        if (data.skillByEmploymentType) {
-          setSkillByEmploymentData(data.skillByEmploymentType);
-        }
-        if (data.employmentTypeDistribution) {
-          setEmploymentTypeData(data.employmentTypeDistribution);
-        }
-        if (data.experienceDistribution) {
-          setExperienceData(data.experienceDistribution);
-        }
-        if (data.registrationsOverTime) {
-          setRegistrationsTimeData(data.registrationsOverTime);
-        }
-        if (data.cumulativeRegistrations) {
-          setCumulativeRegistrationsData(data.cumulativeRegistrations);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load data. Please try again later.");
+        console.log("Fetched reports data:", data); // Log received data
+
+        // Update all state variables with the fetched data
+        // Ensure the keys in the response match the data structure expected here
+        if (data.genderDistribution) setGenderData(data.genderDistribution); else setGenderData([]);
+        if (data.educationDistribution) setEducationData(data.educationDistribution); else setEducationData([]);
+        if (data.ageDistribution) setAgeData(data.ageDistribution); else setAgeData([]);
+        if (data.tehsilDistribution) setTehsilData(data.tehsilDistribution); else setTehsilData([]);
+        if (data.incomeDistribution) setIncomeData(data.incomeDistribution); else setIncomeData([]);
+        if (data.genderByTehsil) setGenderByTehsilData(data.genderByTehsil); else setGenderByTehsilData([]);
+        if (data.dependentsDistribution) setDependentsData(data.dependentsDistribution); else setDependentsData([]);
+        if (data.skillDistribution) setSkillData(data.skillDistribution); else setSkillData([]);
+        if (data.averageIncomeBySkill) setIncomeBySkillData(data.averageIncomeBySkill); else setIncomeBySkillData([]);
+        if (data.experienceVsIncome) setExperienceVsIncomeData(data.experienceVsIncome); else setExperienceVsIncomeData([]);
+        if (data.skillByEmploymentType) setSkillByEmploymentData(data.skillByEmploymentType); else setSkillByEmploymentData([]);
+        if (data.employmentTypeDistribution) setEmploymentTypeData(data.employmentTypeDistribution); else setEmploymentTypeData([]);
+        if (data.experienceDistribution) setExperienceData(data.experienceDistribution); else setExperienceData([]);
+        if (data.registrationsOverTime) setRegistrationsTimeData(data.registrationsOverTime); else setRegistrationsTimeData([]);
+        if (data.cumulativeRegistrations) setCumulativeRegistrationsData(data.cumulativeRegistrations); else setCumulativeRegistrationsData([]);
+        if (data.geographicalDistribution) setGeographicalDistributionData(data.geographicalDistribution); else setGeographicalDistributionData([]); // Update geographical data state
+
+
+      } catch (err: any) { // Use 'any' or a more specific error type
+        console.error("Error fetching filtered reports data:", err);
+        setError(`Failed to load reports data: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRawData();
+    // Call the fetch function
+    fetchFilteredReportsData();
 
-    const fetchFiltersData = async (
-      division: string,
-      district: string,
-      gender: string,
-      craft: string,
-      category: string,
-      tehsil: string
-    ) => {
-      setLoading(true);
-      try {
-        const [
-          divisionsResponse,
-          districtsResponse,
-          tehsilsResponse,
-          craftsResponse,
-          categoriesResponse,
-        ] = await Promise.all([
-          fetch(`${API_BASE_URL}/geo_level?code_length=3`),
-          fetch(`${API_BASE_URL}/geo_level?code_length=6`),
-          fetch(`${API_BASE_URL}/geo_level?code_length=9`),
-          fetch(`${API_BASE_URL}/crafts`),
-          fetch(`${API_BASE_URL}/categories`),
-        ]);
-
-        const divisionsData = await divisionsResponse.json();
-        const districtsData = await districtsResponse.json();
-        const tehsilsData = await tehsilsResponse.json();
-        const craftsData = await craftsResponse.json();
-        const categoriesData = await categoriesResponse.json();
-
-        setDivisions(divisionsData);
-        setDistricts(districtsData);
-        setTehsils(tehsilsData);
-        setCrafts(craftsData);
-        setCategoriesData(categoriesData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load data. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFiltersData(division, district, gender, craft, category, tehsil);
-  }, []);
-
+  }, [
+    // --- DEPENDENCY ARRAY: Add all filter states here ---
+    division,
+    district,
+    gender,
+    craft,
+    category,
+    tehsil,
+    techniquesSkills,
+    education,
+    rawMaterialFilter,
+    employmentTypeFilter,
+    craftingMethodFilter,
+    avgMonthlyIncomeFilter,
+    dependentsCountFilter,
+    inheritedSkillsFilter,
+    hasMachineryFilter,
+    hasTrainingFilter,
+    loanStatusFilter,
+    financialAssistanceFilter,
+    technicalAssistanceFilter,
+    // Add other filter states to the dependency array
+    // Note: selectedReportType, selectedTimePeriod, selectedRegion are *not* in the dependencies
+    // because they only control *which* charts are displayed, not which data is fetched.
+    // If you wanted to only fetch data for the currently selected report type,
+    // the logic would be more complex, fetching only specific endpoints.
+  ]);
+  const allEmploymentTypes = Array.from(
+    new Set(
+      skillByEmploymentData.flatMap((item) =>
+        Object.keys(item).filter((key) => key !== "skill")
+      )
+    )
+  );
   // Function to export data
   const handleExport = () => {
     // Implement export functionality
@@ -244,42 +344,10 @@ const Reports = () => {
   }
 
   return (
-    <Layout>
-      <PageHeader
-        title="Reports & Analytics"
-        description="Generate detailed reports on artisan activities, demographics, and performance metrics."
-      >
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-1.5" onClick={handleExport}>
-            <DownloadCloud className="h-4 w-4" />
-            <span>Export</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="gap-1.5"
-            onClick={handleSaveTemplate}
-          >
-            <FileText className="h-4 w-4" />
-            <span>Save as Template</span>
-          </Button>
-        </div>
-      </PageHeader>
 
-      <Card className="mb-6">
+    <div>
+      {/*  <Card className="mb-6">
         <CardContent className="pt-6">
-          {/* <Filters
-            divisions={divisions}
-            districts={districts}
-            tehsils={tehsils}
-            crafts={crafts}
-            categories={categoriesData}
-            setDivision={setDivision}
-            setDistrict={setDistrict}
-            setGender={setGender}
-            setCraft={setCraft}
-            setCategory={setCategory}
-            setTehsil={setTehsil}
-          /> */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-1.5 block">
@@ -340,459 +408,552 @@ const Reports = () => {
             </div>
           </div>
         </CardContent>
-      </Card>
-
+      </Card> */}
+      <div className="mb-6">
+        <FiltersAll onChange={handleFilterChange} hideQuery={true} /> {/* Integrate the FiltersAll component */}
+      </div>
       {/* Demographic Analysis */}
-      {selectedReportType === "demographic" && (
-        <React.Fragment>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gender Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={genderData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {genderData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Age Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={ageData}
-                    margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+      <React.Fragment>
+        <p className="font-serif my-4 text-center text-4xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Demographic Analysis</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gender Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={genderData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={true}
+                    label={({ name, value, percent }) =>
+                      `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                    }
+                    outerRadius={120}
+                    fill="#8884d8"
+                    dataKey="value"
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis
-                      tickFormatter={(value) => value.toLocaleString()}
-                      label={{
-                        value: "Count",
-                        angle: -90,
-                        position: "insideLeft",
-                        style: { textAnchor: "middle" },
-                      }}
-                    />
-                    <Tooltip
-                      formatter={(value) => [value.toLocaleString(), "Count"]}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="value"
-                      name="Number of People"
-                      fill="#10b981"
-                      radius={[4, 4, 0, 0]}
-                      barSize={40}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Education Level Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={educationData}
-                    margin={{ top: 20, right: 30, left: 40, bottom: 80 }}
+                    {genderData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Age Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={ageData}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis
+                    tickFormatter={(value) => value.toLocaleString()}
+                    label={{
+                      value: "Count",
+                      angle: -90,
+                      position: "insideLeft",
+                      style: { textAnchor: "middle" },
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value) => [value.toLocaleString(), "Count"]}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Number of People"
+                    fill="#10b981"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      angle={-45}
-                      textAnchor="end"
-                      height={80}
-                      tick={{ fontSize: 12 }}
-                      interval={0} // Ensure all labels are shown
-                    />
-                    <YAxis
-                      tickFormatter={(value) => value.toLocaleString()}
-                      label={{
-                        value: "Count",
-                        angle: -90,
-                        position: "insideLeft",
-                        style: { textAnchor: "middle" },
-                      }}
-                    />
-                    <Tooltip
-                      formatter={(value) => [value.toLocaleString(), "Count"]}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: 10 }} />
-                    <Bar
+                    <LabelList
                       dataKey="value"
-                      name="Education Level Distribution"
-                      fill="#3b82f6"
-                      radius={[4, 4, 0, 0]}
-                      barSize={40}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Geographical Distribution by Tehsil</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[150vh]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={tehsilData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                    layout="vertical"
+                      position="top"
+                      formatter={(value) => value.toLocaleString()}
+                    /> {ageData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Education Level Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[80vh]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={educationData}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 80 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    tick={{ fontSize: 12 }}
+                    interval={0}
+                  />
+                  <YAxis
+                    tickFormatter={(value) => value.toLocaleString()}
+                    label={{
+                      value: "Count",
+                      angle: -90,
+                      position: "insideLeft",
+                      style: { textAnchor: "middle" },
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value) => [value.toLocaleString(), "Count"]}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: 10 }} />
+                  <Bar
+                    dataKey="value"
+                    name="Education Level Distribution"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
                   >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={100} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
+                    <LabelList
                       dataKey="value"
-                      name="Number of People"
-                      fill="#f59e0b"
-                      radius={[0, 4, 4, 0]}
+                      position="top"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gender Distribution by Tehsil</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={genderByTehsilData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                    {educationData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Geographical Distribution by Tehsil</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[150vh]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={tehsilData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                  layout="vertical"
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Number of People"
+                    fill="#f59e0b"
+                    radius={[0, 4, 4, 0]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis
-                      dataKey="tehsil"
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
+                    <LabelList
+                      dataKey="value"
+                      position="right"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
+                    {tehsilData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gender Distribution by Tehsil</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={genderByTehsilData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="tehsil"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="Male"
+                    name="Male"
+                    stackId="a"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    <LabelList
                       dataKey="Male"
-                      name="Male"
-                      stackId="a"
-                      fill="#3b82f6"
-                      radius={[4, 4, 0, 0]}
+                      position="insideTop"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                    <Bar
+                  </Bar>
+                  <Bar
+                    dataKey="Female"
+                    name="Female"
+                    stackId="a"
+                    fill="#ec4899"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    <LabelList
                       dataKey="Female"
-                      name="Female"
-                      stackId="a"
-                      fill="#ec4899"
-                      radius={[4, 4, 0, 0]}
+                      position="insideTop"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                    <Bar
+                  </Bar>
+                  <Bar
+                    dataKey="Other"
+                    name="Other"
+                    stackId="a"
+                    fill="#10b981"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    <LabelList
                       dataKey="Other"
-                      name="Other"
-                      stackId="a"
-                      fill="#10b981"
-                      radius={[4, 4, 0, 0]}
+                      position="insideTop"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </React.Fragment>
-      )}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      </React.Fragment>
 
       {/* Economic Impact */}
-      {selectedReportType === "economic" && (
-        <React.Fragment>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Income Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={incomeData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+      <React.Fragment>
+        <p className="font-serif my-4 text-center text-4xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Economic Impact</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Income Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={incomeData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Number of People"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
+                    <LabelList
                       dataKey="value"
-                      name="Number of People"
-                      fill="#3b82f6"
-                      radius={[4, 4, 0, 0]}
+                      position="top"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+                    {incomeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Dependents Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={dependentsData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+          <Card>
+            <CardHeader>
+              <CardTitle>Dependents Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={dependentsData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Number of People"
+                    fill="#f59e0b"
+                    radius={[4, 4, 0, 0]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
+                    <LabelList
                       dataKey="value"
-                      name="Number of People"
-                      fill="#f59e0b"
-                      radius={[4, 4, 0, 0]}
+                      position="top"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
+                    {dependentsData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
 
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Average Income by Skill</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[150vh]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={incomeBySkillData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                    layout="vertical"
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Average Income by Skill</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[150vh]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={incomeBySkillData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                  layout="vertical"
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" />
+                  <YAxis dataKey="skill" type="category" width={100} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="avgIncome"
+                    name="Average Income"
+                    fill="#10b981"
+                    radius={[0, 4, 4, 0]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" />
-                    <YAxis dataKey="skill" type="category" width={100} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
+                    <LabelList
                       dataKey="avgIncome"
-                      name="Average Income"
-                      fill="#10b981"
-                      radius={[0, 4, 4, 0]}
+                      position="right"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
+                    {incomeBySkillData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
 
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Experience vs Income</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[50vh]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      type="number"
-                      dataKey="experience"
-                      name="Years of Experience"
-                    />
-                    <YAxis
-                      type="number"
-                      dataKey="income"
-                      name="Monthly Income"
-                    />
-                    <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-                    <Scatter
-                      name="Experience vs Income"
-                      data={experienceVsIncomeData}
-                      fill="#8884d8"
-                    />
-                  </ScatterChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </React.Fragment>
-      )}
+        {/* <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Experience vs Income</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[50vh]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    dataKey="experience"
+                    name="Years of Experience"
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="income"
+                    name="Monthly Income"
+                  />
+                  <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                  <Scatter
+                    name="Experience vs Income"
+                    data={experienceVsIncomeData}
+                    fill="#8884d8"
+                  />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div> */}
+      </React.Fragment>
 
       {/* Skills Distribution */}
-      {selectedReportType === "skills" && (
-        <React.Fragment>
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Skill Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[90vh]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={skillData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                    layout="vertical"
+      <React.Fragment>
+        <p className="font-serif my-4 text-center text-4xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Skills Distribution</p>
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Skill Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[90vh]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={skillData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                  layout="vertical"
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={120} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Number of People"
+                    fill="#3b82f6"
+                    radius={[0, 4, 4, 0]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={120} />
-                    <Tooltip />
-                    <Legend />
+                    <LabelList
+                      dataKey="value"
+                      position="right"
+                      formatter={(value) => value.toLocaleString()}
+                    />
+                    {skillData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Skill Distribution by Employment Type</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[90vh]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={skillByEmploymentData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="skill"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {allEmploymentTypes.map((key, index) => (
                     <Bar
-                      dataKey="value"
-                      name="Number of People"
-                      fill="#3b82f6"
-                      radius={[0, 4, 4, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Skill Distribution by Employment Type</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[90vh]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={skillByEmploymentData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis
-                      dataKey="skill"
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
-                    />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    {Object.keys(skillByEmploymentData[0] || {})
-                      .filter((key) => key !== "skill")
-                      .map((key, index) => (
-                        <Bar
-                          key={key}
-                          dataKey={key}
-                          name={key}
-                          stackId="a"
-                          fill={COLORS[index % COLORS.length]}
-                          radius={index === 0 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
-                        />
-                      ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Employment Type Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={employmentTypeData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
+                      key={key}
+                      dataKey={key}
+                      name={key}
+                      stackId="a"
+                      fill={COLORS[index % COLORS.length]}
+                      radius={index === 0 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                     >
-                      {employmentTypeData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Experience Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={experienceData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      <LabelList
+                        dataKey={key}
+                        position="insideTop"
+                        formatter={(value) => value.toLocaleString()}
+                      />
+                    </Bar>
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Employment Type Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={employmentTypeData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={true}
+                    label={({ name, value, percent }) =>
+                      `${name}: ${value.toLocaleString()} (${(percent * 100).toFixed(0)}%)`
+                    }
+                    outerRadius={120}
+                    fill="#8884d8"
+                    dataKey="value"
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
+                    {employmentTypeData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Experience Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={sortedExperienceData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Number of People"
+                    fill="#10b981"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    <LabelList
                       dataKey="value"
-                      name="Number of People"
-                      fill="#10b981"
-                      radius={[4, 4, 0, 0]}
+                      position="top"
+                      formatter={(value) => value.toLocaleString()}
                     />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </React.Fragment>
-      )}
+                    {sortedExperienceData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      </React.Fragment>
 
       {/* Growth Analytics */}
-      {selectedReportType === "growth" && (
+      <React.Fragment>
+        <p className="font-serif my-4 text-center text-4xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Growth Analytics</p>
         <Tabs defaultValue="registrationsTime" className="space-y-6">
           <TabsList className="grid grid-cols-2 w-full max-w-md">
             <TabsTrigger value="registrationsTime">Registrations</TabsTrigger>
@@ -823,7 +984,15 @@ const Reports = () => {
                       name="Registrations"
                       stroke="#3b82f6"
                       activeDot={{ r: 8 }}
-                    />
+                    >
+                      {registrationsTimeData.map((entry, index) => (
+                        <Label
+                          key={`label-${index}`}
+                          value={entry.value.toLocaleString()}
+                          position="top"
+                        />
+                      ))}
+                    </Line>
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -859,9 +1028,37 @@ const Reports = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      )}
-    </Layout>
+      </React.Fragment>
+    </div>
   );
 };
 
-export default Reports;
+const Reports = () => {
+
+  return (
+    <Layout>
+      <PageHeader
+        title="Reports & Analytics"
+        description="Generate detailed reports on artisan activities, demographics, and performance metrics."
+      >
+        {/* <div className="flex gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={handleExport}>
+            <DownloadCloud className="h-4 w-4" />
+            <span>Export</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-1.5"
+            onClick={handleSaveTemplate}
+          >
+            <FileText className="h-4 w-4" />
+            <span>Save as Template</span>
+          </Button>
+        </div> */}
+      </PageHeader>
+
+      <ReportsSection />
+    </Layout>
+  );
+};
+export { Reports, ReportsSection };

@@ -49,7 +49,7 @@ const Loader = () => {
         />
 
         {/* Central dots representing artisan craftsmanship */}
-        <div className="absolute inset-0 flex items-center justify-center">
+       {/*  <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative w-12 h-12">
             {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
               <div
@@ -63,7 +63,7 @@ const Loader = () => {
             ))}
             <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Text with gradient effect */}

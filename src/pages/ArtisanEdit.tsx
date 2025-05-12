@@ -61,9 +61,9 @@ const ArtisanEdit = () => {
   const [skills, setSkills] = useState([]); // Holds ALL skills/techniques fetched
   const [employmentTypes, setEmploymentTypes] = useState([
     // Keeping static as per your code
-    { id: 1, name: "Self Employed" },
-    { id: 3, name: "Employee" },
-    { id: 2, name: "Entrepreneur" },
+    { id: 2, name: "Self Employed" },
+    { id: 1, name: "Employee" },
+    { id: 3, name: "Entrepreneur" },
   ] as any[]);
   // Add states for loan types, machine types if needed
 
@@ -754,7 +754,7 @@ const ArtisanEdit = () => {
                   </Label>
                   <div className="relative w-32 h-32 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 mb-2 overflow-hidden">
                     {formData.profile_picture_preview ||
-                    formData.profile_picture ? (
+                      formData.profile_picture ? (
                       <img
                         // Prefer preview URL if a new file is selected, otherwise show existing URL
                         src={
@@ -764,8 +764,8 @@ const ArtisanEdit = () => {
                         alt="Profile"
                         className="w-full h-full object-cover"
                         onError={(e) =>
-                          ((e.target as HTMLImageElement).src =
-                            "https://via.placeholder.com/150")
+                        ((e.target as HTMLImageElement).src =
+                          "https://via.placeholder.com/150")
                         } // Fallback image
                       />
                     ) : (
@@ -786,21 +786,21 @@ const ArtisanEdit = () => {
                   {/* Optional: Clear Button */}
                   {(formData.profile_picture_preview ||
                     formData.profile_picture) && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          profile_picture: null,
-                          profile_picture_file: null,
-                          profile_picture_preview: null,
-                        }))
-                      }
-                      className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 mt-1"
-                    >
-                      Remove Image
-                    </button>
-                  )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            profile_picture: null,
+                            profile_picture_file: null,
+                            profile_picture_preview: null,
+                          }))
+                        }
+                        className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 mt-1"
+                      >
+                        Remove Image
+                      </button>
+                    )}
                 </div>
               </div>
             </div>
@@ -1141,6 +1141,31 @@ const ArtisanEdit = () => {
                   </Select>
                 </div>
 
+
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="crafting_method"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Crafting Method
+                  </Label>
+                  <Select
+                    value={formData.crafting_method || ""}
+                    onValueChange={(value) =>
+                      handleSelectChange("crafting_method", value)
+                    }
+                    name="crafting_method"
+                  >
+                    <SelectTrigger className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 sm:text-sm">
+                      <SelectValue placeholder="Select Crafting Method" />
+                    </SelectTrigger>
+                    <SelectContent className="dark:bg-gray-800">
+                      <SelectItem value="Both">Both</SelectItem>
+                      <SelectItem value="Handmade">Handmade</SelectItem>
+                      <SelectItem value="Machine">Machine</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 {/* Spacer or another field if needed */}
                 {/* <div className="hidden lg:block"></div> */}
 
@@ -1159,7 +1184,7 @@ const ArtisanEdit = () => {
                     htmlFor="has_training"
                     className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
                   >
-                    Received Training?
+                    Training?
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 pt-1">
@@ -1277,8 +1302,8 @@ const ArtisanEdit = () => {
                         alt={`Product ${index + 1}`}
                         className="w-24 h-24 object-cover border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"
                         onError={(e) =>
-                          ((e.target as HTMLImageElement).src =
-                            "https://via.placeholder.com/150")
+                        ((e.target as HTMLImageElement).src =
+                          "https://via.placeholder.com/150")
                         } // Fallback
                       />
                       {/* Consider adding remove for existing if needed */}
@@ -1352,8 +1377,8 @@ const ArtisanEdit = () => {
                         alt={`Shop ${index + 1}`}
                         className="w-24 h-24 object-cover border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"
                         onError={(e) =>
-                          ((e.target as HTMLImageElement).src =
-                            "https://via.placeholder.com/150")
+                        ((e.target as HTMLImageElement).src =
+                          "https://via.placeholder.com/150")
                         }
                       />
                     </div>
@@ -1383,25 +1408,25 @@ const ArtisanEdit = () => {
                 {(formData.shop_images?.length || 0) +
                   (formData.shop_images_files?.length || 0) <
                   5 && (
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor="shop_images_files"
-                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Add Shop Images
-                    </Label>
-                    <Input
-                      id="shop_images_files"
-                      name="shop_images_files"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileChange}
-                      className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="shop_images_files"
+                        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Add Shop Images
+                      </Label>
+                      <Input
+                        id="shop_images_files"
+                        name="shop_images_files"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                            file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/20 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/30"
-                    />
-                  </div>
-                )}
+                      />
+                    </div>
+                  )}
               </div>
             </div>
           </div>

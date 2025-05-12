@@ -12,6 +12,7 @@ interface BarChartCardProps {
   color?: string;
   className?: string;
   loading: boolean;
+  onClick: (data: any, index: number) => void;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -61,7 +62,7 @@ const TriangleBar = (props) => {
   return <path d={getPath(x, y, width, height)} stroke="none" fill={fill} />;
 };
 
-const BarChartCard = ({ title, data, color = "#3b82f6", className, loading }: BarChartCardProps) => {
+const BarChartCard = ({ title, data, color = "#3b82f6", className, loading, onClick }: BarChartCardProps) => {
   if (loading) {
     return (
       <Card className={cn("hover-lift", className)}>
@@ -93,7 +94,9 @@ const BarChartCard = ({ title, data, color = "#3b82f6", className, loading }: Ba
               <YAxis hide />
               <Tooltip content={<CustomTooltip />} />
 
-              <Bar dataKey="value" fill="#8884d8" shape={<TriangleBar />} label={{ position: 'top' }}>
+              <Bar dataKey="value" fill="#8884d8" shape={<TriangleBar />} label={{ position: 'top' }}
+                onClick={onClick}
+              >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={colors[index % 20]} />
                 ))}

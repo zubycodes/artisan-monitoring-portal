@@ -13,6 +13,7 @@ interface PieChartCardProps {
   }>;
   className?: string;
   loading: boolean;
+  onClick: (data: any, index: number) => void;
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -29,7 +30,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, fill }) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value, fill }) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 1.3; // Adjust radius to position outside
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -44,12 +45,12 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
       dominantBaseline="central"
       className={x > cx ? 'ps-3' : 'pe-1'}
     >
-      {`${name} ${(percent * 100).toFixed(0)}%`}
+      {`${name}: ${value} (${(percent * 100).toFixed(0)})%`}
     </text>
   );
 };
 
-const PieChartCard = ({ title, data, className, loading }: PieChartCardProps) => {
+const PieChartCard = ({ title, data, className, loading, onClick }: PieChartCardProps) => {
   if (loading) {
     return (
       <Card className={cn("hover-lift", className)}>
@@ -85,6 +86,7 @@ const PieChartCard = ({ title, data, className, loading }: PieChartCardProps) =>
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                onClick={onClick}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -35,7 +35,7 @@ const StatCard = ({
                 <span 
                   className={cn(
                     "text-xs font-medium flex items-center",
-                    trend.isPositive ? "text-green-500" : "text-red-500"
+                    trend.isPositive ? "text-green-800" : "text-red-500"
                   )}
                 >
                   {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%

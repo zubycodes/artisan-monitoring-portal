@@ -47,7 +47,10 @@ const Login: React.FC = () => {
   // Check if user is already logged in
   useEffect(() => {
     const user = localStorage.getItem("ussr");
-    if (user) navigate("/dashboard");
+    const parsedUser = JSON.parse(user || "{}");
+    if (parsedUser.username === "admin") {
+      navigate("/dashboard");
+    }
   }, [navigate]);
 
   // Image slideshow effect
@@ -134,9 +137,8 @@ const Login: React.FC = () => {
             {artisanImages.map((img, idx) => (
               <div
                 key={idx}
-                className={`absolute inset-0 transition-opacity duration-1500 ease-in-out ${
-                  idx === currentImageIndex ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute inset-0 transition-opacity duration-1500 ease-in-out ${idx === currentImageIndex ? "opacity-100" : "opacity-0"
+                  }`}
               >
                 <img
                   src={img}
@@ -191,11 +193,10 @@ const Login: React.FC = () => {
                     key={idx}
                     onClick={() => setCurrentImageIndex(idx)}
                     aria-label={`View image ${idx + 1}`}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      idx === currentImageIndex
-                        ? "bg-white scale-125"
-                        : "bg-white/40 hover:bg-white/60"
-                    }`}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === currentImageIndex
+                      ? "bg-white scale-125"
+                      : "bg-white/40 hover:bg-white/60"
+                      }`}
                   />
                 ))}
               </div>

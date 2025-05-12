@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "@/components/layout/Loader";
-import { PrinterIcon } from "lucide-react";
+import { Clock, PrinterIcon } from "lucide-react";
 
 // --- Import Lightbox ---
 import Lightbox from "yet-another-react-lightbox";
@@ -35,7 +35,45 @@ const formatDate = (dateString) => {
     return "N/A";
   }
 };
+/**
+ * Formats a date string into 'dd-MM-yyyy hh:mm a' format.
+ *
+ * @param {string | null | undefined} dateString - The date string to format.
+ * @returns {string} The formatted date and time string, or an error message/placeholder if invalid.
+ */
+const formatDateTime = (dateString) => {
+  if (!dateString) {
+    return "N/A";
+  }
 
+  try {
+    const date = new Date(dateString);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const formattedHours = String(hours).padStart(2, '0'); // Pad hours if needed (optional depending on desired format)
+
+
+    return `${day}-${month}-${year} ${formattedHours}:${minutes} ${ampm}`;
+
+  } catch (e) {
+    console.error("Error formatting date and time:", e);
+    return "Error"; // Indicate an error occurred during processing
+  }
+};
 // Helper component for displaying key-value pairs (keep existing)
 const DetailItem = ({
   label,
@@ -66,7 +104,7 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
   const componentRef = useRef(null);
 
   const artisanId = prop_artisan_id || param_id;
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const [artisan, setArtisan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -78,6 +116,7 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
 
   useEffect(() => {
     // ... (keep existing fetch logic)
+
     if (!artisanId) {
       setError("No Artisan ID provided.");
       setLoading(false);
@@ -96,6 +135,13 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
         }
         const data = await response.json();
         setArtisan(data);
+        const imageUrls = searchParams.get("imageUrls");
+        const index = searchParams.get("index");
+        if (imageUrls) {
+          console.log('index', index);
+
+          openLightbox(imageUrls.split(','), Number(index) ?? 0);
+        }
       } catch (error) {
         console.error("Error fetching artisan details:", error);
         setError(`Failed to load artisan data: ${error.message}`);
@@ -125,6 +171,13 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
 
   // --- Function to prepare slides and open lightbox ---
   const openLightbox = (imageUrls, startIndex = 0) => {
+    if (typeof artisanId == 'number') {
+      window.open(
+        `/artisans-directory/${artisanId.toString()}/p?imageUrls=${imageUrls}&index=${startIndex}`,
+        "_blank"
+      );
+      return;
+    }
     if (!imageUrls || imageUrls.length === 0) return;
 
     const slides = imageUrls.map((url) => ({ src: getImageUrl(url) }));
@@ -133,9 +186,14 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
     setLightboxOpen(true);
   };
 
+  const properCase = (text: string): string => {
+    return text.split(' ').map(word =>
+      word.length > 0 ? word[0].toUpperCase() + word.slice(1).toLowerCase() : word
+    ).join(' ');
+  };
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
+      <div className="flex justify-center items-center">
         <Loader />
       </div>
     );
@@ -170,8 +228,9 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
       <div className="flex justify-between items-center mb-6 print:mb-4 border-b pb-3 print:border-black">
         {/* ... (header content) ... */}
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white print:text-xl print:text-black">
-          Artisan Profile: {artisan.name || "N/A"}
+          Artisan Profile: {properCase(artisan.name) || "N/A"}
         </h1>
+        <span className="flex text-gray-400 items-center"><Clock className="me-1" size={20}></Clock> {formatDateTime(artisan.created_at)}</span>
         {param_id && (
           <button
             onClick={handlePrint}
@@ -192,10 +251,10 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 print:grid-cols-4">
               <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 print:grid-cols-3 print:gap-x-4">
                 {/* ... other DetailItems ... */}
-                <DetailItem label="Artisan Name" value={artisan.name} />
+                <DetailItem label="Artisan Name" value={properCase(artisan.name)} />
                 <DetailItem
                   label="Father / Husband Name"
-                  value={artisan.father_name}
+                  value={properCase(artisan.father_name)}
                 />
                 <DetailItem label="CNIC" value={artisan.cnic} />
                 <DetailItem label="Gender" value={artisan.gender} />
@@ -212,9 +271,9 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
               </div>
               {/* --- Modified Profile Picture --- */}
               <div className="flex flex-col items-center justify-start md:col-span-1 mt-4 md:mt-0 print:mt-0 print:items-end print:justify-start">
-                <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 print:text-xs print:font-bold mb-1 self-center print:self-end">
+                {/* <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 print:text-xs print:font-bold mb-1 self-center print:self-end">
                   Profile Picture
-                </dt>
+                </dt> */}
                 <button // Make image clickable
                   type="button"
                   onClick={() => openLightbox(profileImageSlides, 0)}
@@ -225,14 +284,13 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
                   <img
                     src={getImageUrl(artisan.profile_picture)}
                     alt="Profile Picture"
-                    className={`w-32 h-32 print:w-24 print:h-24 rounded-lg border border-gray-300 dark:border-gray-600 object-cover bg-gray-100 print:border-black ${
-                      artisan.profile_picture
-                        ? "cursor-pointer hover:opacity-90 transition-opacity"
-                        : ""
-                    }`}
+                    className={`w-32 h-32 print:w-24 print:h-24 rounded-lg border border-gray-300 dark:border-gray-600 object-cover bg-gray-100 print:border-black ${artisan.profile_picture
+                      ? "cursor-pointer hover:opacity-90 transition-opacity"
+                      : ""
+                      }`}
                     onError={(e) =>
-                      ((e.target as HTMLImageElement).src =
-                        "https://via.placeholder.com/150?text=No+Image")
+                    ((e.target as HTMLImageElement).src =
+                      "https://via.placeholder.com/150?text=No+Image")
                     }
                   />
                 </button>
@@ -322,6 +380,15 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
                 valueClassName="flex items-center"
               />
               <DetailItem
+                label="Crafting Method"
+                value={
+                  <>
+                    {artisan.crafting_method || "N/A"}
+                  </>
+                }
+                valueClassName="flex items-center"
+              />
+              <DetailItem
                 label="Experience (Years)"
                 value={artisan.experience}
               />
@@ -332,6 +399,10 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
               <DetailItem
                 label="Inherited Skills?"
                 value={artisan.inherited_skills}
+              />
+              <DetailItem
+                label="Training?"
+                value={artisan.has_training}
               />
             </dl>
           </div>
@@ -348,22 +419,18 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
               <DetailItem
                 label="Employment Type"
                 value={
-                  artisan.employment_type_id === 1
+                  artisan.employment_type_id === 2
                     ? "Self Employed"
-                    : artisan.employment_type_id === 3
-                    ? "Employee"
-                    : artisan.employment_type_id === 2
-                    ? "Entrepreneur"
-                    : "N/A"
+                    : artisan.employment_type_id === 1
+                      ? "Employee"
+                      : artisan.employment_type_id === 3
+                        ? "Entrepreneur"
+                        : "N/A"
                 }
               />
               <DetailItem
                 label="Raw Material Source"
                 value={artisan.raw_material}
-              />
-              <DetailItem
-                label="Received Training?"
-                value={artisan.has_training}
               />
               <DetailItem
                 label="Owns Machinery?"
@@ -390,7 +457,7 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
         {/* --- Image Upload Sections --- */}
         {(productImagesSlides.length > 0 || shopImagesSlides.length > 0) && (
           <section className="print:break-before-page">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 print:grid-cols-1 print:gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-3 print:grid-cols-1 print:gap-4">
               {/* --- Modified Product Images --- */}
               {productImagesSlides.length > 0 && (
                 <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl shadow-sm overflow-hidden print:border-black print:shadow-none print:rounded-none print:bg-white">
@@ -414,8 +481,8 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
                             alt={`Product ${index + 1}`}
                             className="w-28 h-28 print:w-20 print:h-20 object-cover border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 print:border-black cursor-pointer hover:opacity-90 transition-opacity"
                             onError={(e) =>
-                              ((e.target as HTMLImageElement).src =
-                                "https://via.placeholder.com/150?text=No+Image")
+                            ((e.target as HTMLImageElement).src =
+                              "https://via.placeholder.com/150?text=No+Image")
                             }
                           />
                         </button>
@@ -427,7 +494,7 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
 
               {/* --- Modified Shop Images --- */}
               {shopImagesSlides.length > 0 && (
-                <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl shadow-sm overflow-hidden print:border-black print:shadow-none print:rounded-none print:bg-white">
+                <div className="w-full bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl shadow-sm overflow-hidden print:border-black print:shadow-none print:rounded-none print:bg-white">
                   <div className="p-6 md:p-8 print:p-2">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-3 print:text-lg print:border-black print:text-black">
                       Shop Images
@@ -446,8 +513,8 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
                             alt={`Shop ${index + 1}`}
                             className="w-28 h-28 print:w-20 print:h-20 object-cover border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 print:border-black cursor-pointer hover:opacity-90 transition-opacity"
                             onError={(e) =>
-                              ((e.target as HTMLImageElement).src =
-                                "https://via.placeholder.com/150?text=No+Image")
+                            ((e.target as HTMLImageElement).src =
+                              "https://via.placeholder.com/150?text=No+Image")
                             }
                           />
                         </button>
@@ -621,9 +688,9 @@ const ArtisanDetail = ({ artisan_id: prop_artisan_id }) => {
         index={lightboxIndex}
         // Add optional plugins for an "awesome" experience
         plugins={[Zoom, Thumbnails, Fullscreen]}
-        // You can customize plugin behavior further if needed
-        // zoom={{ maxZoomPixelRatio: 3, zoomInMultiplier: 1.5 }}
-        // thumbnails={{ border: 0, gap: 8, imageFit: "cover" }}
+      // You can customize plugin behavior further if needed
+      // zoom={{ maxZoomPixelRatio: 3, zoomInMultiplier: 1.5 }}
+      // thumbnails={{ border: 0, gap: 8, imageFit: "cover" }}
       />
       {/* Print-specific styles (keep existing) */}
       <style>{`

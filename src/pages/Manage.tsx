@@ -145,16 +145,15 @@ const Manage = () => {
     // Basic validation
     try {
       const response = await fetch(
-        `${API_BASE_URL}/${
-          activeTab == "Craft"
-            ? "crafts"
-            : activeTab == "Category"
+        `${API_BASE_URL}/${activeTab == "Craft"
+          ? "crafts"
+          : activeTab == "Category"
             ? "categories"
             : activeTab == "Technique/Skills"
-            ? "techniques"
-            : activeTab == "User"
-            ? "user/register"
-            : ""
+              ? "techniques"
+              : activeTab == "User"
+                ? "user/register"
+                : ""
         }`,
         {
           method: "POST",
@@ -193,16 +192,15 @@ const Manage = () => {
     // Basic validation
     try {
       const response = await fetch(
-        `${API_BASE_URL}/${
-          activeTab == "Craft"
-            ? "crafts"
-            : activeTab == "Category"
+        `${API_BASE_URL}/${activeTab == "Craft"
+          ? "crafts"
+          : activeTab == "Category"
             ? "categories"
             : activeTab == "Technique/Skills"
-            ? "techniques"
-            : activeTab == "User"
-            ? "user/register"
-            : ""
+              ? "techniques"
+              : activeTab == "User"
+                ? "user/register"
+                : ""
         }/${selectedObject.id}`,
         {
           method: "PUT",
@@ -241,16 +239,15 @@ const Manage = () => {
     // Basic validation
     try {
       const response = await fetch(
-        `${API_BASE_URL}/${
-          activeTab == "Craft"
-            ? "crafts"
-            : activeTab == "Category"
+        `${API_BASE_URL}/${activeTab == "Craft"
+          ? "crafts"
+          : activeTab == "Category"
             ? "categories"
             : activeTab == "Technique/Skills"
-            ? "techniques"
-            : activeTab == "User"
-            ? "user"
-            : ""
+              ? "techniques"
+              : activeTab == "User"
+                ? "user"
+                : ""
         }/${selectedObject.id}`,
         {
           method: "DELETE",
@@ -354,193 +351,193 @@ const Manage = () => {
                     {(activeTab == "Craft" ||
                       activeTab == "Category" ||
                       activeTab == "Technique/Skills") && (
-                      <form ref={formRef} onSubmit={handleSubmit}>
-                        <div className="grid gap-4 py-4">
-                          {(activeTab == "Category" ||
-                            activeTab == "Technique/Skills") && (
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="craft_Id" className="text-right">
-                                Craft
-                              </label>
-                              <div className="col-span-3 w-full">
-                                <Select
-                                  value={object.craft_name}
-                                  onValueChange={(value) => {
-                                    setObject((prev) => ({
-                                      ...prev,
-                                      craft_Id: crafts.find(
-                                        (x) => x.name == value
-                                      )?.id,
-                                    }));
-                                    setCategories(
-                                      categoriesAll.filter(
-                                        (x) =>
-                                          x.craft_Id ==
-                                          crafts.find((x) => x.name == value)
-                                            ?.id
-                                      )
-                                    );
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue
-                                      className="text-muted"
-                                      placeholder="Select craft"
-                                    />
-                                  </SelectTrigger>
-                                  <SelectContent
-                                    position="popper"
-                                    className="w-full min-w-[200px]"
-                                  >
-                                    {crafts.map((craft) => (
-                                      <SelectItem
-                                        key={craft.id}
-                                        value={craft.name}
+                        <form ref={formRef} onSubmit={handleSubmit}>
+                          <div className="grid gap-4 py-4">
+                            {(activeTab == "Category" ||
+                              activeTab == "Technique/Skills") && (
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <label htmlFor="craft_Id" className="text-right">
+                                    Craft
+                                  </label>
+                                  <div className="col-span-3 w-full">
+                                    <Select
+                                      value={object.craft_name}
+                                      onValueChange={(value) => {
+                                        setObject((prev) => ({
+                                          ...prev,
+                                          craft_Id: crafts.find(
+                                            (x) => x.name == value
+                                          )?.id,
+                                        }));
+                                        setCategories(
+                                          categoriesAll.filter(
+                                            (x) =>
+                                              x.craft_Id ==
+                                              crafts.find((x) => x.name == value)
+                                                ?.id
+                                          )
+                                        );
+                                      }}
+                                    >
+                                      <SelectTrigger className="w-full">
+                                        <SelectValue
+                                          className="text-muted"
+                                          placeholder="Select craft"
+                                        />
+                                      </SelectTrigger>
+                                      <SelectContent
+                                        position="popper"
+                                        className="w-full min-w-[200px]"
                                       >
-                                        {craft.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          )}
-
-                          {activeTab == "Technique/Skills" && (
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label
-                                htmlFor="category_Id"
-                                className="text-right"
-                              >
-                                Category
-                              </label>
-                              <div className="col-span-3 w-full">
-                                <Select
-                                  value={object.category_name}
-                                  onValueChange={(value) => {
-                                    setObject((prev) => ({
-                                      ...prev,
-                                      category_Id: categories.find(
-                                        (x) => x.name == value
-                                      )?.id,
-                                    }));
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select category" />
-                                  </SelectTrigger>
-                                  <SelectContent
-                                    position="popper"
-                                    className="w-full min-w-[200px]"
-                                    sideOffset={5}
-                                  >
-                                    {categories.map((category) => (
-                                      <SelectItem
-                                        key={category.id}
-                                        value={category.name}
-                                      >
-                                        {category.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <label htmlFor="name" className="text-right">
-                              Name
-                            </label>
-                            <Input
-                              id="name"
-                              value={object.name}
-                              onChange={(e) =>
-                                setObject((prev) => ({
-                                  ...prev,
-                                  name: e.target.value,
-                                }))
-                              }
-                              className="col-span-3"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <label htmlFor="color" className="text-right">
-                              Color
-                            </label>
-                            <Input
-                              type="color"
-                              id="color"
-                              value={object.color || "#000000"}
-                              onChange={(e) =>
-                                setObject((prev) => ({
-                                  ...prev,
-                                  color: e.target.value,
-                                }))
-                              }
-                              className="col-span-3 h-10 w-full"
-                            />
-                          </div>
-                        </div>
-
-                        <DialogFooter>
-                          <Button
-                            type="submit"
-                            className="gap-1.5"
-                            disabled={
-                              isLoading ||
-                              !object.name ||
-                              ((activeTab == "Category" ||
-                                activeTab == "Technique/Skills") &&
-                                !object.craft_Id) ||
-                              (activeTab == "Technique/Skills" &&
-                                !object.category_Id)
-                            }
-                          >
-                            <Save className="h-4 w-4" />
-                            <span>
-                              {isLoading ? (
-                                <span className="flex items-center">
-                                  <svg
-                                    className="animate-spin h-5 w-5 mr-2 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    />
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    />
-                                  </svg>
-                                  Saving...
-                                </span>
-                              ) : (
-                                "Save"
+                                        {crafts.map((craft) => (
+                                          <SelectItem
+                                            key={craft.id}
+                                            value={craft.name}
+                                          >
+                                            {craft.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
                               )}
-                            </span>
-                          </Button>
-                          <DialogClose asChild>
+
+                            {activeTab == "Technique/Skills" && (
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label
+                                  htmlFor="category_Id"
+                                  className="text-right"
+                                >
+                                  Category
+                                </label>
+                                <div className="col-span-3 w-full">
+                                  <Select
+                                    value={object.category_name}
+                                    onValueChange={(value) => {
+                                      setObject((prev) => ({
+                                        ...prev,
+                                        category_Id: categories.find(
+                                          (x) => x.name == value
+                                        )?.id,
+                                      }));
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                    <SelectContent
+                                      position="popper"
+                                      className="w-full min-w-[200px]"
+                                      sideOffset={5}
+                                    >
+                                      {categories.map((category) => (
+                                        <SelectItem
+                                          key={category.id}
+                                          value={category.name}
+                                        >
+                                          {category.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <label htmlFor="name" className="text-right">
+                                Name
+                              </label>
+                              <Input
+                                id="name"
+                                value={object.name}
+                                onChange={(e) =>
+                                  setObject((prev) => ({
+                                    ...prev,
+                                    name: e.target.value,
+                                  }))
+                                }
+                                className="col-span-3"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <label htmlFor="color" className="text-right">
+                                Color
+                              </label>
+                              <Input
+                                type="color"
+                                id="color"
+                                value={object.color || "#000000"}
+                                onChange={(e) =>
+                                  setObject((prev) => ({
+                                    ...prev,
+                                    color: e.target.value,
+                                  }))
+                                }
+                                className="col-span-3 h-10 w-full"
+                              />
+                            </div>
+                          </div>
+
+                          <DialogFooter>
                             <Button
-                              type="button"
-                              variant="outline"
+                              type="submit"
                               className="gap-1.5"
+                              disabled={
+                                isLoading ||
+                                !object.name ||
+                                ((activeTab == "Category" ||
+                                  activeTab == "Technique/Skills") &&
+                                  !object.craft_Id) ||
+                                (activeTab == "Technique/Skills" &&
+                                  !object.category_Id)
+                              }
                             >
-                              <span>Cancel</span>
+                              <Save className="h-4 w-4" />
+                              <span>
+                                {isLoading ? (
+                                  <span className="flex items-center">
+                                    <svg
+                                      className="animate-spin h-5 w-5 mr-2 text-white"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                      />
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                      />
+                                    </svg>
+                                    Saving...
+                                  </span>
+                                ) : (
+                                  "Save"
+                                )}
+                              </span>
                             </Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </form>
-                    )}
+                            <DialogClose asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="gap-1.5"
+                              >
+                                <span>Cancel</span>
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </form>
+                      )}
 
                     {activeTab == "User" && (
                       <form ref={formRef} onSubmit={handleSubmit}>
@@ -661,7 +658,7 @@ const Manage = () => {
                             disabled={
                               isLoading ||
                               alreadyExistError ==
-                                "Username already exist!! Try other" ||
+                              "Username already exist!! Try other" ||
                               !object.username ||
                               !object.roles ||
                               (object.role == "User" && !object.geoLevel_Code)
@@ -724,193 +721,193 @@ const Manage = () => {
                     {(activeTab == "Craft" ||
                       activeTab == "Category" ||
                       activeTab == "Technique/Skills") && (
-                      <form ref={editFormRef} onSubmit={handleEdit}>
-                        <div className="grid gap-4 py-4">
-                          {(activeTab == "Category" ||
-                            activeTab == "Technique/Skills") && (
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="craft_Id" className="text-right">
-                                Craft
-                              </label>
-                              <div className="col-span-3 w-full">
-                                <Select
-                                  value={selectedObject.craft_name}
-                                  onValueChange={(value) => {
-                                    setSelectedObject((prev) => ({
-                                      ...prev,
-                                      craft_Id: crafts.find(
-                                        (x) => x.name == value
-                                      )?.id,
-                                    }));
-                                    setCategories(
-                                      categoriesAll.filter(
-                                        (x) =>
-                                          x.craft_Id ==
-                                          crafts.find((x) => x.name == value)
-                                            ?.id
-                                      )
-                                    );
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue
-                                      className="text-muted"
-                                      placeholder="Select craft"
-                                    />
-                                  </SelectTrigger>
-                                  <SelectContent
-                                    position="popper"
-                                    className="w-full min-w-[200px]"
-                                  >
-                                    {crafts.map((craft) => (
-                                      <SelectItem
-                                        key={craft.id}
-                                        value={craft.name}
+                        <form ref={editFormRef} onSubmit={handleEdit}>
+                          <div className="grid gap-4 py-4">
+                            {(activeTab == "Category" ||
+                              activeTab == "Technique/Skills") && (
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <label htmlFor="craft_Id" className="text-right">
+                                    Craft
+                                  </label>
+                                  <div className="col-span-3 w-full">
+                                    <Select
+                                      value={selectedObject.craft_name}
+                                      onValueChange={(value) => {
+                                        setSelectedObject((prev) => ({
+                                          ...prev,
+                                          craft_Id: crafts.find(
+                                            (x) => x.name == value
+                                          )?.id,
+                                        }));
+                                        setCategories(
+                                          categoriesAll.filter(
+                                            (x) =>
+                                              x.craft_Id ==
+                                              crafts.find((x) => x.name == value)
+                                                ?.id
+                                          )
+                                        );
+                                      }}
+                                    >
+                                      <SelectTrigger className="w-full">
+                                        <SelectValue
+                                          className="text-muted"
+                                          placeholder="Select craft"
+                                        />
+                                      </SelectTrigger>
+                                      <SelectContent
+                                        position="popper"
+                                        className="w-full min-w-[200px]"
                                       >
-                                        {craft.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          )}
-
-                          {activeTab == "Technique/Skills" && (
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label
-                                htmlFor="category_Id"
-                                className="text-right"
-                              >
-                                Category
-                              </label>
-                              <div className="col-span-3 w-full">
-                                <Select
-                                  value={selectedObject.category_name}
-                                  onValueChange={(value) => {
-                                    setSelectedObject((prev) => ({
-                                      ...prev,
-                                      category_Id: categories.find(
-                                        (x) => x.name == value
-                                      )?.id,
-                                    }));
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select category" />
-                                  </SelectTrigger>
-                                  <SelectContent
-                                    position="popper"
-                                    className="w-full min-w-[200px]"
-                                    sideOffset={5}
-                                  >
-                                    {categories.map((category) => (
-                                      <SelectItem
-                                        key={category.id}
-                                        value={category.name}
-                                      >
-                                        {category.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <label htmlFor="name" className="text-right">
-                              Name
-                            </label>
-                            <Input
-                              id="name"
-                              defaultValue={selectedObject.name}
-                              onChange={(e) =>
-                                setSelectedObject((prev) => ({
-                                  ...prev,
-                                  name: e.target.value,
-                                }))
-                              }
-                              className="col-span-3"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <label htmlFor="color" className="text-right">
-                              Color
-                            </label>
-                            <Input
-                              type="color"
-                              id="color"
-                              value={selectedObject.color || "#000000"}
-                              onChange={(e) =>
-                                setSelectedObject((prev) => ({
-                                  ...prev,
-                                  color: e.target.value,
-                                }))
-                              }
-                              className="col-span-3 h-10 w-full"
-                            />
-                          </div>
-                        </div>
-
-                        <DialogFooter>
-                          <Button
-                            type="submit"
-                            className="gap-1.5"
-                            disabled={
-                              isLoading ||
-                              !selectedObject.name ||
-                              ((activeTab == "Category" ||
-                                activeTab == "Technique/Skills") &&
-                                !selectedObject.craft_Id) ||
-                              (activeTab == "Technique/Skills" &&
-                                !selectedObject.category_Id)
-                            }
-                          >
-                            <Save className="h-4 w-4" />
-                            <span>
-                              {isLoading ? (
-                                <span className="flex items-center">
-                                  <svg
-                                    className="animate-spin h-5 w-5 mr-2 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    />
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    />
-                                  </svg>
-                                  Updating...
-                                </span>
-                              ) : (
-                                "Update"
+                                        {crafts.map((craft) => (
+                                          <SelectItem
+                                            key={craft.id}
+                                            value={craft.name}
+                                          >
+                                            {craft.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
                               )}
-                            </span>
-                          </Button>
-                          <DialogClose asChild>
+
+                            {activeTab == "Technique/Skills" && (
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label
+                                  htmlFor="category_Id"
+                                  className="text-right"
+                                >
+                                  Category
+                                </label>
+                                <div className="col-span-3 w-full">
+                                  <Select
+                                    value={selectedObject.category_name}
+                                    onValueChange={(value) => {
+                                      setSelectedObject((prev) => ({
+                                        ...prev,
+                                        category_Id: categories.find(
+                                          (x) => x.name == value
+                                        )?.id,
+                                      }));
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                    <SelectContent
+                                      position="popper"
+                                      className="w-full min-w-[200px]"
+                                      sideOffset={5}
+                                    >
+                                      {categories.map((category) => (
+                                        <SelectItem
+                                          key={category.id}
+                                          value={category.name}
+                                        >
+                                          {category.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <label htmlFor="name" className="text-right">
+                                Name
+                              </label>
+                              <Input
+                                id="name"
+                                defaultValue={selectedObject.name}
+                                onChange={(e) =>
+                                  setSelectedObject((prev) => ({
+                                    ...prev,
+                                    name: e.target.value,
+                                  }))
+                                }
+                                className="col-span-3"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <label htmlFor="color" className="text-right">
+                                Color
+                              </label>
+                              <Input
+                                type="color"
+                                id="color"
+                                value={selectedObject.color || "#000000"}
+                                onChange={(e) =>
+                                  setSelectedObject((prev) => ({
+                                    ...prev,
+                                    color: e.target.value,
+                                  }))
+                                }
+                                className="col-span-3 h-10 w-full"
+                              />
+                            </div>
+                          </div>
+
+                          <DialogFooter>
                             <Button
-                              type="button"
-                              variant="outline"
+                              type="submit"
                               className="gap-1.5"
+                              disabled={
+                                isLoading ||
+                                !selectedObject.name ||
+                                ((activeTab == "Category" ||
+                                  activeTab == "Technique/Skills") &&
+                                  !selectedObject.craft_Id) ||
+                                (activeTab == "Technique/Skills" &&
+                                  !selectedObject.category_Id)
+                              }
                             >
-                              <span>Cancel</span>
+                              <Save className="h-4 w-4" />
+                              <span>
+                                {isLoading ? (
+                                  <span className="flex items-center">
+                                    <svg
+                                      className="animate-spin h-5 w-5 mr-2 text-white"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                      />
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                      />
+                                    </svg>
+                                    Updating...
+                                  </span>
+                                ) : (
+                                  "Update"
+                                )}
+                              </span>
                             </Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </form>
-                    )}
+                            <DialogClose asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="gap-1.5"
+                              >
+                                <span>Cancel</span>
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </form>
+                      )}
                   </DialogContent>
                 </Dialog>
 
@@ -997,6 +994,7 @@ const Manage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
+                              <TableHead className="text-center">Sr.</TableHead>
                               <TableHead>Name</TableHead>
                               <TableHead>Number of Categories</TableHead>
                               <TableHead>Number of Techniques/Skills</TableHead>
@@ -1005,11 +1003,14 @@ const Manage = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {crafts.map((craft) => (
+                            {crafts.map((craft, index) => (
                               <TableRow
                                 key={craft.id}
                                 className="cursor-pointer"
                               >
+                                <TableCell className="text-center">
+                                  {(index + 1)}.
+                                </TableCell>
                                 <TableCell className="group">
                                   <Badge
                                     className="py-1 px-4"
@@ -1137,6 +1138,7 @@ const Manage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
+                              <TableHead className="text-center">Sr.</TableHead>
                               <TableHead>Craft</TableHead>
                               <TableHead>Category</TableHead>
                               <TableHead>Number of Techniques/Skills</TableHead>
@@ -1145,11 +1147,14 @@ const Manage = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {categoriesAll.map((category) => (
+                            {categoriesAll.map((category, index) => (
                               <TableRow
                                 key={category.id}
                                 className="cursor-pointer"
                               >
+                                <TableCell className="text-center">
+                                  {(index + 1)}.
+                                </TableCell>
                                 <TableCell>
                                   <Badge
                                     className="py-1 px-4"
@@ -1249,6 +1254,7 @@ const Manage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
+                              <TableHead className="text-center">Sr.</TableHead>
                               <TableHead>Craft</TableHead>
                               <TableHead>Category</TableHead>
                               <TableHead>Technique/Skills</TableHead>
@@ -1257,11 +1263,15 @@ const Manage = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {techniqueSkills.map((skill) => (
+                            {techniqueSkills.map((skill, index) => (
                               <TableRow
                                 key={skill.id}
                                 className="cursor-pointer"
                               >
+
+                                <TableCell className="text-center">
+                                  {(index + 1)}.
+                                </TableCell>
                                 <TableCell>
                                   <Badge
                                     className="py-1 px-4"
@@ -1415,6 +1425,7 @@ const Manage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
+                              <TableHead className="text-center">Sr.</TableHead>
                               <TableHead>Name</TableHead>
                               <TableHead>Role</TableHead>
                               <TableHead>Region</TableHead>
@@ -1423,12 +1434,16 @@ const Manage = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {users.map((user) => (
+                            {users.map((user, index) => (
                               <TableRow
                                 key={user.id}
                                 className="cursor-pointer"
                                 style={{ color: user.color }}
                               >
+                                
+                                <TableCell className="text-center">
+                                  {(index + 1)}.
+                                </TableCell>
                                 <TableCell className="font-medium">
                                   {user.username}
                                 </TableCell>
